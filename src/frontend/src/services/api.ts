@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AuthResponse, User, Item } from '../types';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = '/api';
 
 // Create axios instance with interceptor for JWT
 const api = axios.create({
