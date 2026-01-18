@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Node modules (for frontend)
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+
+# Dependencies
+package-lock.json
+yarn.lock
+
+# Misc
+*.bak
+*.tmp
+.temp/
+
+#etc
+project_explanation.md
+todo.md
