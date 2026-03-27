@@ -1,5 +1,5 @@
 # ClearMind — Personal Digital Twin Assistant
-
+ 
 An AI-powered productivity application that transforms unstructured "brain dumps" into organized, prioritized tasks using Google Gemini AI.
 
 ## 🎯 Overview
@@ -75,7 +75,7 @@ cp .env.example .env
 # Run server
 uvicorn app.main:app --reload
 ```
-
+```
 ### Frontend Setup
 
 ```bash
