@@ -10,12 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.database import Base
-from app.models.conversation import Conversation
-from app.models.item import Item
-from app.models.item_link import ItemLink
-from app.models.message import Message
 from app.models.profile_update import ProfileUpdate
-from app.models.reflection import Reflection
 from app.models.user import User
 from app.models.user_context import UserContext
 from app.routes.profile import create_context_rule, delete_context_rule
@@ -133,16 +128,18 @@ class ProfileMemoryTests(unittest.TestCase):
     def test_profile_create_and_delete_routes_audit_changes(self):
         import asyncio
 
-        created = asyncio.run(create_context_rule(
-            UserContextCreate(
-                category="general",
-                fact="User likes concise explanations.",
-                source="user",
-                confidence=1.0,
-            ),
-            current_user=self.user,
-            db=self.db,
-        ))
+        created = asyncio.run(
+            create_context_rule(
+                UserContextCreate(
+                    category="general",
+                    fact="User likes concise explanations.",
+                    source="user",
+                    confidence=1.0,
+                ),
+                current_user=self.user,
+                db=self.db,
+            )
+        )
 
         self.assertEqual(created.fact, "User likes concise explanations.")
         self.assertEqual(self.db.query(UserContext).count(), 1)

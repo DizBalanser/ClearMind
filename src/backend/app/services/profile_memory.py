@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
 import google.generativeai as genai
 from sqlalchemy.orm import Session
@@ -9,7 +9,6 @@ from app.models.profile_update import ProfileUpdate
 from app.models.user_context import UserContext
 from app.schemas import MemoryExtractionLLMResponse
 from app.services.llm_json import generate_json
-
 
 VALID_MEMORY_CATEGORIES = {"identity", "constraint", "goal", "general"}
 
@@ -25,12 +24,7 @@ def context_fact(context: UserContext) -> str:
 
 
 def active_context_facts(db: Session, user_id: int) -> list[str]:
-    entries = (
-        db.query(UserContext)
-        .filter(UserContext.user_id == user_id)
-        .order_by(UserContext.updated_at.desc())
-        .all()
-    )
+    entries = db.query(UserContext).filter(UserContext.user_id == user_id).order_by(UserContext.updated_at.desc()).all()
     return [fact for entry in entries if (fact := context_fact(entry))]
 
 
@@ -60,12 +54,7 @@ def filter_new_memory_candidates(
     candidates: Iterable[dict],
 ) -> list[dict]:
     """Normalize candidates and remove duplicates already saved for this user."""
-    existing_keys = {
-        key
-        for (key,) in db.query(UserContext.key)
-        .filter(UserContext.user_id == user_id)
-        .all()
-    }
+    existing_keys = {key for (key,) in db.query(UserContext.key).filter(UserContext.user_id == user_id).all()}
     seen_keys: set[str] = set()
     filtered: list[dict] = []
 
@@ -178,11 +167,7 @@ def save_profile_memory(
         return None
 
     key = _memory_key(normalized["category"], normalized["fact"])
-    context = (
-        db.query(UserContext)
-        .filter(UserContext.user_id == user_id, UserContext.key == key)
-        .first()
-    )
+    context = db.query(UserContext).filter(UserContext.user_id == user_id, UserContext.key == key).first()
     old_value = context.value_json if context else None
     new_value = {"category": normalized["category"], "fact": normalized["fact"]}
 
@@ -241,10 +226,7 @@ def persist_profile_updates(
         if not context:
             continue
         saved_updates.append(
-            db.query(ProfileUpdate)
-            .filter(ProfileUpdate.user_id == user_id)
-            .order_by(ProfileUpdate.id.desc())
-            .first()
+            db.query(ProfileUpdate).filter(ProfileUpdate.user_id == user_id).order_by(ProfileUpdate.id.desc()).first()
         )
 
     return saved_updates

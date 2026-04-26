@@ -4,9 +4,11 @@ Handles unstructured chaotic thoughts, parsing them into actionable tasks and ca
 This is the core classification engine migrated from the original ClassificationService.
 """
 
-import google.generativeai as genai
-from typing import List, Dict, Any
 from datetime import datetime
+from typing import Any
+
+import google.generativeai as genai
+
 from app.config import get_settings
 from app.schemas import BrainDumpLLMResponse
 from app.services.llm_json import generate_json
@@ -22,7 +24,9 @@ class BrainDumpAgent:
         genai.configure(api_key=settings.google_api_key)
         self.model = genai.GenerativeModel(settings.gemini_flash_model)
 
-    def process(self, user_input: str, user_profile: dict, chat_history: List[Dict], existing_items: List[Dict] = None) -> Dict[str, Any]:
+    def process(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], existing_items: list[dict] = None
+    ) -> dict[str, Any]:
         """
         Main entry point. Classifies input and returns structured agent response.
 
@@ -52,7 +56,9 @@ class BrainDumpAgent:
             "links": links,
         }
 
-    def _classify_input(self, user_input: str, user_profile: dict, chat_history: List[Dict]) -> Dict[str, List[Dict[str, Any]]]:
+    def _classify_input(
+        self, user_input: str, user_profile: dict, chat_history: list[dict]
+    ) -> dict[str, list[dict[str, Any]]]:
         """Classify user's brain dump into structured items."""
         prompt = self._build_classification_prompt(user_input, user_profile, chat_history)
 
@@ -74,7 +80,7 @@ class BrainDumpAgent:
             print(f"[BrainDumpAgent] Classification error: {e}")
             return {"extracted_items": [], "profile_updates": []}
 
-    def _build_classification_prompt(self, user_input: str, user_profile: dict, chat_history: List[Dict]) -> str:
+    def _build_classification_prompt(self, user_input: str, user_profile: dict, chat_history: list[dict]) -> str:
         """Build the complete prompt including system instructions and user context."""
         goals = user_profile.get("goals", {})
         life_areas = user_profile.get("life_areas", [])
@@ -112,11 +118,11 @@ ITEM CLASSIFICATION RULES:
 ---
 
 **User Profile:**
-Life Areas: {', '.join(life_areas) if life_areas else 'Not specified'}
+Life Areas: {", ".join(life_areas) if life_areas else "Not specified"}
 Goals:
-{goals_text if goals_text else '  (None specified yet)'}
+{goals_text if goals_text else "  (None specified yet)"}
 Known Long-Term Facts:
-{facts_text if facts_text else '  (None specified yet)'}
+{facts_text if facts_text else "  (None specified yet)"}
 {history_text}
 **User Input:**
 "{user_input}"
@@ -140,7 +146,7 @@ You must output ONLY valid JSON in the following structure. If no long-term fact
   ]
 }}"""
 
-    def _detect_links(self, new_items: List[Dict], existing_items: List[Dict]) -> List[Dict]:
+    def _detect_links(self, new_items: list[dict], existing_items: list[dict]) -> list[dict]:
         """
         Detect potential links between newly classified items and existing items.
         Uses simple keyword matching for now — can be upgraded to semantic similarity later.
@@ -163,15 +169,17 @@ You must output ONLY valid JSON in the following structure. If no long-term fact
                     existing_words = set(existing_title.split())
                     common = new_words & existing_words - {"the", "a", "an", "to", "for", "and", "or", "my", "i"}
                     if len(common) >= 1:
-                        links.append({
-                            "source_title": new_item["title"],
-                            "target_id": existing.get("id"),
-                            "link_type": "relates_to",
-                        })
+                        links.append(
+                            {
+                                "source_title": new_item["title"],
+                                "target_id": existing.get("id"),
+                                "link_type": "relates_to",
+                            }
+                        )
 
         return links
 
-    def _generate_response(self, user_input: str, classified_items: List[Dict], user_name: str = None) -> str:
+    def _generate_response(self, user_input: str, classified_items: list[dict], user_name: str = None) -> str:
         """Generate a friendly AI response summarizing the classification."""
         if not classified_items:
             return "I understood your message, but I couldn't identify any specific tasks or items to track. Could you clarify what you'd like me to help with?"
@@ -181,7 +189,7 @@ You must output ONLY valid JSON in the following structure. If no long-term fact
         # Group by category
         by_category = {}
         for item in classified_items:
-            cat = item['category']
+            cat = item["category"]
             if cat not in by_category:
                 by_category[cat] = []
             by_category[cat].append(item)
@@ -189,31 +197,27 @@ You must output ONLY valid JSON in the following structure. If no long-term fact
         # Build response
         response_parts = [greeting + "Let me organize that for you:\n"]
 
-        category_emojis = {
-            'task': '✅',
-            'idea': '💡',
-            'thought': '💭'
-        }
+        category_emojis = {"task": "✅", "idea": "💡", "thought": "💭"}
 
         for category, items in by_category.items():
-            emoji = category_emojis.get(category, '•')
+            emoji = category_emojis.get(category, "•")
             cat_name = category.upper()
 
             for item in items:
-                title = item['title']
-                deadline = item.get('deadline')
-                subcategory = item.get('subcategory', '')
+                title = item["title"]
+                deadline = item.get("deadline")
+                subcategory = item.get("subcategory", "")
                 deadline_text = f" (by {deadline[:10]})" if deadline else ""
                 subcat_text = f" [{subcategory}]" if subcategory else ""
 
                 response_parts.append(f"\n{emoji} {cat_name}{subcat_text}: {title}{deadline_text}")
 
                 # Add contextual follow-up
-                if subcategory == 'obligation' and deadline:
-                    response_parts.append(f"   → Added to your priorities. Would you like me to help break this down?")
-                elif subcategory in ['habit', 'goal']:
-                    response_parts.append(f"   → Tracking this for you!")
-                elif category == 'thought':
-                    response_parts.append(f"   → Saved for reflection.")
+                if subcategory == "obligation" and deadline:
+                    response_parts.append("   → Added to your priorities. Would you like me to help break this down?")
+                elif subcategory in ["habit", "goal"]:
+                    response_parts.append("   → Tracking this for you!")
+                elif category == "thought":
+                    response_parts.append("   → Saved for reflection.")
 
         return "".join(response_parts)

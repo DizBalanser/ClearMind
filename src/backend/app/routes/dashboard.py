@@ -19,7 +19,6 @@ from app.schemas import (
 )
 from app.utils.dependencies import get_current_user
 
-
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
@@ -40,16 +39,9 @@ async def get_dashboard_analytics(
     start_day = dates[0]
     start_dt = datetime.combine(start_day, datetime.min.time())
 
-    activity_by_day = {
-        day: {"task": 0, "idea": 0, "thought": 0}
-        for day in dates
-    }
+    activity_by_day = {day: {"task": 0, "idea": 0, "thought": 0} for day in dates}
 
-    items = (
-        db.query(Item)
-        .filter(Item.user_id == current_user.id, Item.created_at >= start_dt)
-        .all()
-    )
+    items = db.query(Item).filter(Item.user_id == current_user.id, Item.created_at >= start_dt).all()
     for item in items:
         if not item.created_at:
             continue
@@ -96,11 +88,7 @@ async def get_dashboard_analytics(
             )
         )
 
-    active_profile_rules = (
-        db.query(UserContext)
-        .filter(UserContext.user_id == current_user.id)
-        .count()
-    )
+    active_profile_rules = db.query(UserContext).filter(UserContext.user_id == current_user.id).count()
     memory_updates = (
         db.query(ProfileUpdate)
         .filter(ProfileUpdate.user_id == current_user.id, ProfileUpdate.created_at >= start_dt)
@@ -116,9 +104,7 @@ async def get_dashboard_analytics(
         .count()
     )
     reflections = (
-        db.query(Reflection)
-        .filter(Reflection.user_id == current_user.id, Reflection.created_at >= start_dt)
-        .count()
+        db.query(Reflection).filter(Reflection.user_id == current_user.id, Reflection.created_at >= start_dt).count()
     )
     hidden_connections = (
         db.query(ItemLink)

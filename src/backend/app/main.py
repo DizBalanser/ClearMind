@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import get_settings
-from app.database import engine, Base
-from app.models import profile_update, user_context
-from app.routes import auth, users, items, chat, schedule, graph, profile, dashboard
+from app.database import Base, engine
+from app.routes import auth, chat, dashboard, graph, items, profile, schedule, users
 
 # Get settings
 settings = get_settings()
@@ -15,11 +15,11 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Personal Digital Twin Assistant API",
     description="Backend API for the Personal Digital Twin productivity assistant",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Configure CORS
-origins = settings.allowed_origins.split(',')
+origins = settings.allowed_origins.split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,11 +43,7 @@ app.include_router(dashboard.router, prefix="/api")
 @app.get("/")
 async def root():
     """Root endpoint"""
-    return {
-        "message": "Personal Digital Twin Assistant API",
-        "version": "1.0.0",
-        "docs": "/docs"
-    }
+    return {"message": "Personal Digital Twin Assistant API", "version": "1.0.0", "docs": "/docs"}
 
 
 @app.get("/health")
@@ -58,4 +54,5 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

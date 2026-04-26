@@ -10,10 +10,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.database import Base
-from app.models.conversation import Conversation
 from app.models.item import Item
 from app.models.item_link import ItemLink
-from app.models.message import Message
 from app.models.profile_update import ProfileUpdate
 from app.models.reflection import Reflection
 from app.models.user import User
@@ -41,11 +39,13 @@ class DashboardAnalyticsTests(unittest.TestCase):
     def _run_analytics(self, days=30, user=None):
         import asyncio
 
-        return asyncio.run(get_dashboard_analytics(
-            days=days,
-            current_user=user or self.user,
-            db=self.db,
-        ))
+        return asyncio.run(
+            get_dashboard_analytics(
+                days=days,
+                current_user=user or self.user,
+                db=self.db,
+            )
+        )
 
     def test_empty_user_returns_zero_filled_days(self):
         result = self._run_analytics(days=30)
@@ -58,12 +58,14 @@ class DashboardAnalyticsTests(unittest.TestCase):
 
     def test_mixed_categories_produce_heatmap_totals(self):
         now = datetime.utcnow()
-        self.db.add_all([
-            Item(user_id=self.user.id, title="Task", category="task", created_at=now),
-            Item(user_id=self.user.id, title="Idea", category="idea", created_at=now),
-            Item(user_id=self.user.id, title="Thought", category="thought", created_at=now),
-            Item(user_id=self.other_user.id, title="Other", category="task", created_at=now),
-        ])
+        self.db.add_all(
+            [
+                Item(user_id=self.user.id, title="Task", category="task", created_at=now),
+                Item(user_id=self.user.id, title="Idea", category="idea", created_at=now),
+                Item(user_id=self.user.id, title="Thought", category="thought", created_at=now),
+                Item(user_id=self.other_user.id, title="Other", category="task", created_at=now),
+            ]
+        )
         self.db.commit()
 
         result = self._run_analytics(days=30)
@@ -96,14 +98,24 @@ class DashboardAnalyticsTests(unittest.TestCase):
 
     def test_telemetry_is_scoped_to_current_user(self):
         now = datetime.utcnow()
-        self.db.add_all([
-            UserContext(user_id=self.user.id, category="goal", key="goal:test", value_json={"fact": "User has a goal."}),
-            ProfileUpdate(user_id=self.user.id, category="goal", fact="User has a goal.", new_value_json={}, created_at=now),
-            Reflection(user_id=self.user.id, summary="summary", created_at=now),
-            Item(user_id=self.user.id, title="Pending", category="task", status="pending", created_at=now),
-            UserContext(user_id=self.other_user.id, category="goal", key="goal:other", value_json={"fact": "Other fact."}),
-            ProfileUpdate(user_id=self.other_user.id, category="goal", fact="Other fact.", new_value_json={}, created_at=now),
-        ])
+        self.db.add_all(
+            [
+                UserContext(
+                    user_id=self.user.id, category="goal", key="goal:test", value_json={"fact": "User has a goal."}
+                ),
+                ProfileUpdate(
+                    user_id=self.user.id, category="goal", fact="User has a goal.", new_value_json={}, created_at=now
+                ),
+                Reflection(user_id=self.user.id, summary="summary", created_at=now),
+                Item(user_id=self.user.id, title="Pending", category="task", status="pending", created_at=now),
+                UserContext(
+                    user_id=self.other_user.id, category="goal", key="goal:other", value_json={"fact": "Other fact."}
+                ),
+                ProfileUpdate(
+                    user_id=self.other_user.id, category="goal", fact="Other fact.", new_value_json={}, created_at=now
+                ),
+            ]
+        )
         self.db.commit()
 
         result = self._run_analytics(days=30)

@@ -8,9 +8,9 @@ from app.models.profile_update import ProfileUpdate
 from app.models.user import User
 from app.models.user_context import UserContext
 from app.schemas import (
-    ProfileUpdateResponse,
-    ProfileQuestionResponse,
     ProfileQuestionnaireSubmit,
+    ProfileQuestionResponse,
+    ProfileUpdateResponse,
     UserContextCreate,
     UserContextResponse,
     UserContextUpdate,
@@ -18,7 +18,6 @@ from app.schemas import (
 )
 from app.services.profile_memory import _memory_key, save_profile_memory
 from app.utils.dependencies import get_current_user
-
 
 router = APIRouter(prefix="/profile", tags=["Profile Memory"])
 
@@ -226,11 +225,7 @@ async def update_context_rule(
     db: Session = Depends(get_db),
 ):
     """Correct an active AI memory fact."""
-    context = (
-        db.query(UserContext)
-        .filter(UserContext.id == context_id, UserContext.user_id == current_user.id)
-        .first()
-    )
+    context = db.query(UserContext).filter(UserContext.id == context_id, UserContext.user_id == current_user.id).first()
     if not context:
         raise HTTPException(status_code=404, detail="Context rule not found")
 
@@ -272,11 +267,7 @@ async def delete_context_rule(
     db: Session = Depends(get_db),
 ):
     """Remove an active AI memory fact."""
-    context = (
-        db.query(UserContext)
-        .filter(UserContext.id == context_id, UserContext.user_id == current_user.id)
-        .first()
-    )
+    context = db.query(UserContext).filter(UserContext.id == context_id, UserContext.user_id == current_user.id).first()
     if not context:
         raise HTTPException(status_code=404, detail="Context rule not found")
 

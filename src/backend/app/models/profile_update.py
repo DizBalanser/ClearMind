@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Float, Integer, JSON, String, Text, TIMESTAMP, ForeignKey
+from sqlalchemy import JSON, TIMESTAMP, Column, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -8,6 +8,7 @@ from app.database import Base
 
 class ProfileUpdate(Base):
     """Append-only history of long-term profile facts extracted by agents."""
+
     __tablename__ = "profile_updates"
 
     id = Column(Integer, primary_key=True, index=True)

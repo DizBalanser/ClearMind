@@ -8,7 +8,6 @@ import os
 import sqlite3
 import sys
 
-
 DB_PATH = os.path.join(os.path.dirname(__file__), "clearmind.db")
 
 

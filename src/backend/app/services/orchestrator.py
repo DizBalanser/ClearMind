@@ -4,19 +4,20 @@ Analyzes user input and routes to the appropriate specialized agent.
 Uses Flash model for minimal latency on the routing decision.
 """
 
+from typing import Any
+
 import google.generativeai as genai
-from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
+
 from app.config import get_settings
-from app.models.item import Item
 from app.models.conversation import Conversation
+from app.models.item import Item
 from app.models.reflection import Reflection
-from app.models.item_link import ItemLink
 from app.schemas import RouterLLMResponse
 from app.services.agents.brain_dump import BrainDumpAgent
+from app.services.agents.planner import PlannerAgent
 from app.services.agents.reflection import ReflectionAgent
 from app.services.agents.scheduler import SchedulerAgent
-from app.services.agents.planner import PlannerAgent
 from app.services.llm_json import generate_json
 
 
@@ -43,10 +44,10 @@ class Orchestrator:
         self,
         user_input: str,
         user_profile: dict,
-        chat_history: List[Dict[str, Any]],
+        chat_history: list[dict[str, Any]],
         db: Session,
         user_id: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Main entry point. Routes the user's message to the correct agent and returns the result.
 
@@ -82,7 +83,7 @@ class Orchestrator:
             # Fallback to brain_dump
             return self._run_brain_dump(user_input, user_profile, chat_history, db, user_id)
 
-    def _classify_intent(self, user_input: str) -> Dict[str, Any]:
+    def _classify_intent(self, user_input: str) -> dict[str, Any]:
         """Use Flash to quickly classify the user's intent for routing."""
         prompt = f"""You are a router that classifies user messages into exactly one agent category.
 
@@ -118,12 +119,13 @@ Return JSON: {{"agent": "brain_dump|reflection|scheduler|planner", "confidence":
             print(f"[Orchestrator] Routing error, falling back to brain_dump: {e}")
             return {"agent": "brain_dump"}
 
-    def _run_brain_dump(self, user_input: str, user_profile: dict, chat_history: List[Dict], db: Session, user_id: int) -> Dict[str, Any]:
+    def _run_brain_dump(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], db: Session, user_id: int
+    ) -> dict[str, Any]:
         """Execute Brain Dump agent with existing items for link detection."""
         existing_items = db.query(Item).filter(Item.user_id == user_id).order_by(Item.created_at.desc()).limit(50).all()
         existing_items_data = [
-            {"id": i.id, "title": i.title, "life_area": i.life_area, "category": i.category}
-            for i in existing_items
+            {"id": i.id, "title": i.title, "life_area": i.life_area, "category": i.category} for i in existing_items
         ]
 
         result = self.agents["brain_dump"].process(user_input, user_profile, chat_history, existing_items_data)
@@ -134,30 +136,40 @@ Return JSON: {{"agent": "brain_dump|reflection|scheduler|planner", "confidence":
         result.setdefault("profile_updates", [])
         return result
 
-    def _run_reflection(self, user_input: str, user_profile: dict, chat_history: List[Dict], db: Session, user_id: int) -> Dict[str, Any]:
+    def _run_reflection(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], db: Session, user_id: int
+    ) -> dict[str, Any]:
         """Execute Reflection agent with historical context."""
         # Get recent items
         recent_items = db.query(Item).filter(Item.user_id == user_id).order_by(Item.created_at.desc()).limit(50).all()
         recent_items_data = [
             {
-                "id": i.id, "title": i.title, "category": i.category,
-                "subcategory": i.subcategory, "status": i.status,
-                "life_area": i.life_area, "priority": i.priority,
+                "id": i.id,
+                "title": i.title,
+                "category": i.category,
+                "subcategory": i.subcategory,
+                "status": i.status,
+                "life_area": i.life_area,
+                "priority": i.priority,
                 "created_at": i.created_at.isoformat() if i.created_at else "",
             }
             for i in recent_items
         ]
 
         # Get recent conversations
-        recent_convos = db.query(Conversation).filter(
-            Conversation.user_id == user_id
-        ).order_by(Conversation.created_at.desc()).limit(10).all()
+        recent_convos = (
+            db.query(Conversation)
+            .filter(Conversation.user_id == user_id)
+            .order_by(Conversation.created_at.desc())
+            .limit(10)
+            .all()
+        )
         recent_convos_data = [{"messages": c.messages} for c in recent_convos]
 
         # Get last reflection
-        last_reflection = db.query(Reflection).filter(
-            Reflection.user_id == user_id
-        ).order_by(Reflection.created_at.desc()).first()
+        last_reflection = (
+            db.query(Reflection).filter(Reflection.user_id == user_id).order_by(Reflection.created_at.desc()).first()
+        )
         last_reflection_data = None
         if last_reflection:
             last_reflection_data = {
@@ -167,8 +179,7 @@ Return JSON: {{"agent": "brain_dump|reflection|scheduler|planner", "confidence":
             }
 
         result = self.agents["reflection"].process(
-            user_input, user_profile, chat_history,
-            recent_items_data, recent_convos_data, last_reflection_data
+            user_input, user_profile, chat_history, recent_items_data, recent_convos_data, last_reflection_data
         )
 
         # Save the new reflection if we got one
@@ -189,18 +200,28 @@ Return JSON: {{"agent": "brain_dump|reflection|scheduler|planner", "confidence":
         result.setdefault("profile_updates", [])
         return result
 
-    def _run_scheduler(self, user_input: str, user_profile: dict, chat_history: List[Dict], db: Session, user_id: int) -> Dict[str, Any]:
+    def _run_scheduler(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], db: Session, user_id: int
+    ) -> dict[str, Any]:
         """Execute Scheduler agent with pending tasks."""
-        pending_items = db.query(Item).filter(
-            Item.user_id == user_id,
-            Item.status == "pending",
-            Item.category == "task",
-        ).order_by(Item.priority.desc(), Item.deadline.asc()).all()
+        pending_items = (
+            db.query(Item)
+            .filter(
+                Item.user_id == user_id,
+                Item.status == "pending",
+                Item.category == "task",
+            )
+            .order_by(Item.priority.desc(), Item.deadline.asc())
+            .all()
+        )
 
         pending_data = [
             {
-                "id": i.id, "title": i.title, "priority": i.priority,
-                "category": i.category, "subcategory": i.subcategory,
+                "id": i.id,
+                "title": i.title,
+                "priority": i.priority,
+                "category": i.category,
+                "subcategory": i.subcategory,
                 "deadline": i.deadline.isoformat() if i.deadline else None,
             }
             for i in pending_items
@@ -217,6 +238,7 @@ Return JSON: {{"agent": "brain_dump|reflection|scheduler|planner", "confidence":
                     item.estimated_duration = block.get("estimated_duration_minutes")
                     try:
                         from datetime import datetime
+
                         if block.get("scheduled_start"):
                             item.scheduled_start = datetime.fromisoformat(block["scheduled_start"])
                         if block.get("scheduled_end"):
@@ -232,14 +254,20 @@ Return JSON: {{"agent": "brain_dump|reflection|scheduler|planner", "confidence":
         result.setdefault("profile_updates", [])
         return result
 
-    def _run_planner(self, user_input: str, user_profile: dict, chat_history: List[Dict], db: Session, user_id: int) -> Dict[str, Any]:
+    def _run_planner(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], db: Session, user_id: int
+    ) -> dict[str, Any]:
         """Execute Planner agent with all items."""
         all_items = db.query(Item).filter(Item.user_id == user_id).all()
         all_items_data = [
             {
-                "id": i.id, "title": i.title, "category": i.category,
-                "subcategory": i.subcategory, "status": i.status,
-                "life_area": i.life_area, "priority": i.priority,
+                "id": i.id,
+                "title": i.title,
+                "category": i.category,
+                "subcategory": i.subcategory,
+                "status": i.status,
+                "life_area": i.life_area,
+                "priority": i.priority,
             }
             for i in all_items
         ]

@@ -4,9 +4,11 @@ Acts as an adviser, looking at long-term Goals in the database and
 cross-referencing them with daily actions. Uses Gemma 4 31B for deep reasoning.
 """
 
-import google.generativeai as genai
-from typing import List, Dict, Any
 import json
+from typing import Any
+
+import google.generativeai as genai
+
 from app.config import get_settings
 from app.schemas import PlannerLLMResponse
 from app.services.llm_json import generate_json
@@ -22,7 +24,9 @@ class PlannerAgent:
         genai.configure(api_key=settings.google_api_key)
         self.model = genai.GenerativeModel(settings.gemini_pro_model)
 
-    def process(self, user_input: str, user_profile: dict, chat_history: List[Dict], all_items: List[Dict]) -> Dict[str, Any]:
+    def process(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], all_items: list[dict]
+    ) -> dict[str, Any]:
         """
         Analyze alignment between user's goals and their actual activity.
 
@@ -57,7 +61,9 @@ class PlannerAgent:
                 "reflection": None,
             }
 
-    def _build_prompt(self, user_input: str, user_profile: dict, chat_history: List[Dict], all_items: List[Dict]) -> str:
+    def _build_prompt(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], all_items: list[dict]
+    ) -> str:
         """Build the strategic planning prompt."""
         goals = user_profile.get("goals", {})
         life_areas = user_profile.get("life_areas", [])
@@ -70,7 +76,7 @@ class PlannerAgent:
         pending = [i for i in all_items if i.get("status") == "pending"]
         ideas = [i for i in all_items if i.get("category") == "idea"]
 
-        def format_items(items_list: List[Dict], limit: int = 30) -> str:
+        def format_items(items_list: list[dict], limit: int = 30) -> str:
             if not items_list:
                 return "  (None)"
             lines = []
@@ -96,9 +102,9 @@ Before writing your response, carefully cross-reference the conversation history
 - What does the recent conversation history reveal about the user's current priorities and mindset?
 
 **User's Goals:**
-{json.dumps(goals, indent=2) if goals else '(No goals defined yet)'}
+{json.dumps(goals, indent=2) if goals else "(No goals defined yet)"}
 
-**Life Areas:** {', '.join(life_areas) if life_areas else 'Not specified'}
+**Life Areas:** {", ".join(life_areas) if life_areas else "Not specified"}
 
 **Known Long-Term Facts:**
 {facts_text}

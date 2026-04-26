@@ -19,7 +19,7 @@ from app.models.item_link import ItemLink
 from app.models.message import Message
 from app.models.reflection import Reflection
 from app.models.user import User
-from app.routes.chat import get_chat_history, send_message
+from app.routes.chat import send_message
 from app.routes.graph import analyze_graph, create_link, delete_link, get_graph_data
 from app.routes.items import (
     create_item,
@@ -57,38 +57,46 @@ class RoutesAndOrchestratorTests(unittest.TestCase):
     # Items Route Coverage (happy + error + edge)
     # ------------------------------------------------------------------
     def test_items_route_happy_paths(self):
-        created = self._run(create_item(
-            ItemCreate(title="Write thesis", category="task", life_area="study", priority=9),
-            current_user=self.user,
-            db=self.db,
-        ))
+        created = self._run(
+            create_item(
+                ItemCreate(title="Write thesis", category="task", life_area="study", priority=9),
+                current_user=self.user,
+                db=self.db,
+            )
+        )
         self.assertEqual(created.title, "Write thesis")
 
         self.db.add(Item(user_id=self.user.id, title="Side idea", category="idea", status="pending", priority=3))
         self.db.commit()
 
-        filtered = self._run(get_items(category="task", status=None, life_area=None, current_user=self.user, db=self.db))
+        filtered = self._run(
+            get_items(category="task", status=None, life_area=None, current_user=self.user, db=self.db)
+        )
         self.assertEqual(len(filtered), 1)
         self.assertEqual(filtered[0].category, "task")
 
         loaded = self._run(get_item(created.id, current_user=self.user, db=self.db))
         self.assertEqual(loaded.id, created.id)
 
-        updated = self._run(update_item(
-            created.id,
-            ItemUpdate(title="Write thesis draft", priority=10),
-            current_user=self.user,
-            db=self.db,
-        ))
+        updated = self._run(
+            update_item(
+                created.id,
+                ItemUpdate(title="Write thesis draft", priority=10),
+                current_user=self.user,
+                db=self.db,
+            )
+        )
         self.assertEqual(updated.title, "Write thesis draft")
         self.assertEqual(updated.priority, 10)
 
-        status_updated = self._run(update_item_status(
-            created.id,
-            {"status": "done"},
-            current_user=self.user,
-            db=self.db,
-        ))
+        status_updated = self._run(
+            update_item_status(
+                created.id,
+                {"status": "done"},
+                current_user=self.user,
+                db=self.db,
+            )
+        )
         self.assertEqual(status_updated.status, "done")
 
         result = self._run(delete_item(created.id, current_user=self.user, db=self.db))
@@ -130,11 +138,13 @@ class RoutesAndOrchestratorTests(unittest.TestCase):
         self.assertEqual(len(data.nodes), 2)
         self.assertEqual(data.links[0].link_type, "relates_to")
 
-        new_link = self._run(create_link(
-            ItemLinkCreate(source_id=b.id, target_id=a.id, link_type="blocks"),
-            current_user=self.user,
-            db=self.db,
-        ))
+        new_link = self._run(
+            create_link(
+                ItemLinkCreate(source_id=b.id, target_id=a.id, link_type="blocks"),
+                current_user=self.user,
+                db=self.db,
+            )
+        )
         self.assertEqual(new_link.link_type, "blocks")
 
         self._run(delete_link(new_link.id, current_user=self.user, db=self.db))
@@ -148,19 +158,23 @@ class RoutesAndOrchestratorTests(unittest.TestCase):
         self.db.refresh(other)
 
         with self.assertRaises(HTTPException) as missing_items:
-            self._run(create_link(
-                ItemLinkCreate(source_id=own.id, target_id=other.id, link_type="relates_to"),
-                current_user=self.user,
-                db=self.db,
-            ))
+            self._run(
+                create_link(
+                    ItemLinkCreate(source_id=own.id, target_id=other.id, link_type="relates_to"),
+                    current_user=self.user,
+                    db=self.db,
+                )
+            )
         self.assertEqual(missing_items.exception.status_code, 404)
 
         with self.assertRaises(HTTPException) as self_link:
-            self._run(create_link(
-                ItemLinkCreate(source_id=own.id, target_id=own.id, link_type="relates_to"),
-                current_user=self.user,
-                db=self.db,
-            ))
+            self._run(
+                create_link(
+                    ItemLinkCreate(source_id=own.id, target_id=own.id, link_type="relates_to"),
+                    current_user=self.user,
+                    db=self.db,
+                )
+            )
         self.assertEqual(self_link.exception.status_code, 400)
         with self.assertRaises(HTTPException) as missing_link:
             self._run(delete_link(9999, current_user=self.user, db=self.db))
@@ -210,11 +224,13 @@ class RoutesAndOrchestratorTests(unittest.TestCase):
             "reflection": None,
         }
 
-        response = self._run(send_message(
-            ChatMessage(message="I should prepare slides and submit."),
-            current_user=self.user,
-            db=self.db,
-        ))
+        response = self._run(
+            send_message(
+                ChatMessage(message="I should prepare slides and submit."),
+                current_user=self.user,
+                db=self.db,
+            )
+        )
 
         self.assertEqual(response.agent, "brain_dump")
         self.assertEqual(len(response.items), 0)
@@ -236,12 +252,14 @@ class RoutesAndOrchestratorTests(unittest.TestCase):
     # Orchestrator Coverage with mocked Gemini integration
     # ------------------------------------------------------------------
     def _build_orchestrator(self):
-        with patch("app.services.orchestrator.genai.configure"), \
-             patch("app.services.orchestrator.genai.GenerativeModel", return_value=MagicMock()), \
-             patch("app.services.orchestrator.BrainDumpAgent") as brain_cls, \
-             patch("app.services.orchestrator.ReflectionAgent") as reflection_cls, \
-             patch("app.services.orchestrator.SchedulerAgent") as scheduler_cls, \
-             patch("app.services.orchestrator.PlannerAgent") as planner_cls:
+        with (
+            patch("app.services.orchestrator.genai.configure"),
+            patch("app.services.orchestrator.genai.GenerativeModel", return_value=MagicMock()),
+            patch("app.services.orchestrator.BrainDumpAgent") as brain_cls,
+            patch("app.services.orchestrator.ReflectionAgent") as reflection_cls,
+            patch("app.services.orchestrator.SchedulerAgent") as scheduler_cls,
+            patch("app.services.orchestrator.PlannerAgent") as planner_cls,
+        ):
             brain_cls.return_value = MagicMock()
             reflection_cls.return_value = MagicMock()
             scheduler_cls.return_value = MagicMock()
@@ -251,15 +269,17 @@ class RoutesAndOrchestratorTests(unittest.TestCase):
     def test_orchestrator_classify_intent_happy_invalid_and_error(self):
         orch = self._build_orchestrator()
 
-        with patch("app.services.orchestrator.generate_json", return_value=RouterLLMResponse(
-            agent="planner", confidence=0.91, reasoning="strategic question"
-        )):
+        with patch(
+            "app.services.orchestrator.generate_json",
+            return_value=RouterLLMResponse(agent="planner", confidence=0.91, reasoning="strategic question"),
+        ):
             routed = orch._classify_intent("Am I on track?")
             self.assertEqual(routed["agent"], "planner")
 
-        with patch("app.services.orchestrator.generate_json", return_value=SimpleNamespace(
-            agent="unknown", confidence=0.5, reasoning="bad"
-        )):
+        with patch(
+            "app.services.orchestrator.generate_json",
+            return_value=SimpleNamespace(agent="unknown", confidence=0.5, reasoning="bad"),
+        ):
             routed = orch._classify_intent("anything")
             self.assertEqual(routed["agent"], "brain_dump")
 
@@ -270,10 +290,12 @@ class RoutesAndOrchestratorTests(unittest.TestCase):
     def test_orchestrator_route_dispatch_and_fallback(self):
         orch = self._build_orchestrator()
         db = self.db
-        with patch.object(orch, "_run_brain_dump", return_value={"agent": "brain_dump"}) as bd, \
-             patch.object(orch, "_run_reflection", return_value={"agent": "reflection"}) as rf, \
-             patch.object(orch, "_run_scheduler", return_value={"agent": "scheduler"}) as sc, \
-             patch.object(orch, "_run_planner", return_value={"agent": "planner"}) as pl:
+        with (
+            patch.object(orch, "_run_brain_dump", return_value={"agent": "brain_dump"}) as bd,
+            patch.object(orch, "_run_reflection", return_value={"agent": "reflection"}) as rf,
+            patch.object(orch, "_run_scheduler", return_value={"agent": "scheduler"}) as sc,
+            patch.object(orch, "_run_planner", return_value={"agent": "planner"}) as pl,
+        ):
             for agent in ["brain_dump", "reflection", "scheduler", "planner", "unknown"]:
                 with patch.object(orch, "_classify_intent", return_value={"agent": agent}):
                     result = orch.route_and_execute("x", {}, [], db, self.user.id)

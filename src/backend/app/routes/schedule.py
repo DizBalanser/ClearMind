@@ -1,13 +1,14 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
-from sqlalchemy.orm import Session
-from typing import Optional
-from datetime import datetime
 from icalendar import Calendar, Event
+from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.models.user import User
 from app.models.item import Item
-from app.schemas import ScheduleBlock, ScheduleUpdate
+from app.models.user import User
+from app.schemas import ScheduleUpdate
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(prefix="/schedule", tags=["Schedule"])
@@ -15,8 +16,8 @@ router = APIRouter(prefix="/schedule", tags=["Schedule"])
 
 @router.get("", response_model=list[dict])
 async def get_schedule(
-    start_date: Optional[str] = Query(None, description="ISO date string YYYY-MM-DD"),
-    end_date: Optional[str] = Query(None, description="ISO date string YYYY-MM-DD"),
+    start_date: str | None = Query(None, description="ISO date string YYYY-MM-DD"),
+    end_date: str | None = Query(None, description="ISO date string YYYY-MM-DD"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -66,10 +67,14 @@ async def update_schedule_block(
     db: Session = Depends(get_db),
 ):
     """Update a scheduled item's time block (for drag-and-drop on frontend)."""
-    item = db.query(Item).filter(
-        Item.id == item_id,
-        Item.user_id == current_user.id,
-    ).first()
+    item = (
+        db.query(Item)
+        .filter(
+            Item.id == item_id,
+            Item.user_id == current_user.id,
+        )
+        .first()
+    )
 
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -107,10 +112,15 @@ async def export_ics(
     db: Session = Depends(get_db),
 ):
     """Export all scheduled items as an .ics calendar file."""
-    items = db.query(Item).filter(
-        Item.user_id == current_user.id,
-        Item.scheduled_start.isnot(None),
-    ).order_by(Item.scheduled_start.asc()).all()
+    items = (
+        db.query(Item)
+        .filter(
+            Item.user_id == current_user.id,
+            Item.scheduled_start.isnot(None),
+        )
+        .order_by(Item.scheduled_start.asc())
+        .all()
+    )
 
     cal = Calendar()
     cal.add("prodid", "-//ClearMind//Phase2//EN")

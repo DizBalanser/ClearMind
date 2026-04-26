@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Float, Integer, JSON, String, TIMESTAMP, ForeignKey
+from sqlalchemy import JSON, TIMESTAMP, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -8,6 +8,7 @@ from app.database import Base
 
 class UserContext(Base):
     """Current normalized long-term facts known about a user."""
+
     __tablename__ = "user_context"
 
     id = Column(Integer, primary_key=True, index=True)

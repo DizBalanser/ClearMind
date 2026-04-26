@@ -1,11 +1,14 @@
-from sqlalchemy import Column, Integer, Text, TIMESTAMP, ForeignKey, JSON
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import JSON, TIMESTAMP, Column, ForeignKey, Integer, Text
+from sqlalchemy.orm import relationship
+
 from app.database import Base
 
 
 class Reflection(Base):
     """Reflection model storing evolving mental-state summaries from Agent B."""
+
     __tablename__ = "reflections"
 
     id = Column(Integer, primary_key=True, index=True)

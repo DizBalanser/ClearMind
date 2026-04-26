@@ -4,9 +4,11 @@ Takes tasks and assigns estimated durations and optimal time blocks.
 Uses Flash model for fast structured JSON output.
 """
 
-import google.generativeai as genai
-from typing import List, Dict, Any
 from datetime import datetime
+from typing import Any
+
+import google.generativeai as genai
+
 from app.config import get_settings
 from app.schemas import SchedulerLLMResponse
 from app.services.llm_json import generate_json
@@ -22,7 +24,9 @@ class SchedulerAgent:
         genai.configure(api_key=settings.google_api_key)
         self.model = genai.GenerativeModel(settings.gemini_pro_model)
 
-    def process(self, user_input: str, user_profile: dict, chat_history: List[Dict], pending_items: List[Dict]) -> Dict[str, Any]:
+    def process(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], pending_items: list[dict]
+    ) -> dict[str, Any]:
         """
         Generate an optimized schedule from the user's pending tasks.
 
@@ -60,7 +64,9 @@ class SchedulerAgent:
                 "schedule": [],
             }
 
-    def _build_prompt(self, user_input: str, user_profile: dict, chat_history: List[Dict], pending_items: List[Dict]) -> str:
+    def _build_prompt(
+        self, user_input: str, user_profile: dict, chat_history: list[dict], pending_items: list[dict]
+    ) -> str:
         """Build the scheduling prompt."""
         current_date = datetime.now().strftime("%Y-%m-%d")
         current_time = datetime.now().strftime("%H:%M")
@@ -69,9 +75,9 @@ class SchedulerAgent:
 
         items_lines = []
         for item in pending_items:
-            deadline_text = f", deadline: {item.get('deadline')}" if item.get('deadline') else ""
+            deadline_text = f", deadline: {item.get('deadline')}" if item.get("deadline") else ""
             items_lines.append(
-                f"  - ID:{item['id']} | \"{item['title']}\" | "
+                f'  - ID:{item["id"]} | "{item["title"]}" | '
                 f"priority:{item.get('priority', 5)} | "
                 f"category:{item.get('category', 'task')}"
                 f"{deadline_text}"

@@ -1,10 +1,9 @@
 import json
 import re
-from typing import Any, Optional, Type, TypeVar
+from typing import Any, TypeVar
 
 import google.generativeai as genai
 from pydantic import BaseModel, TypeAdapter
-
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -34,7 +33,7 @@ def parse_json_response(text: str) -> dict[str, Any]:
     return parsed
 
 
-def validate_json_response(text: str, schema: Type[T]) -> T:
+def validate_json_response(text: str, schema: type[T]) -> T:
     """Parse model output and validate it against a Pydantic schema."""
     return TypeAdapter(schema).validate_python(parse_json_response(text))
 
@@ -42,7 +41,7 @@ def validate_json_response(text: str, schema: Type[T]) -> T:
 def generate_json(
     model: Any,
     prompt: str,
-    schema: Optional[Type[T]] = None,
+    schema: type[T] | None = None,
     *,
     temperature: float = 0.2,
     max_output_tokens: int = 2048,

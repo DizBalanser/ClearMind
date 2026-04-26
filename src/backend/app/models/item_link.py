@@ -1,11 +1,14 @@
-from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
+
 from app.database import Base
 
 
 class ItemLink(Base):
     """ItemLink model representing edges in the knowledge graph between items."""
+
     __tablename__ = "item_links"
 
     id = Column(Integer, primary_key=True, index=True)

@@ -4,9 +4,9 @@ Adds new columns to `items` table and creates `reflections` + `item_links` table
 Safe to run multiple times — uses IF NOT EXISTS / checks for existing columns.
 """
 
+import os
 import sqlite3
 import sys
-import os
 
 # Default path to the database
 DB_PATH = os.path.join(os.path.dirname(__file__), "clearmind.db")

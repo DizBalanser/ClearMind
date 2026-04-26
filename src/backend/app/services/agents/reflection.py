@@ -5,10 +5,11 @@ an evolving, summarized profile of the user's mental state and habits.
 Uses Gemma 4 31B for deep reasoning with native thinking capabilities.
 """
 
-import google.generativeai as genai
-from typing import Dict, Any, List, Optional
 import json
-from datetime import datetime
+from typing import Any
+
+import google.generativeai as genai
+
 from app.config import get_settings
 from app.schemas import ReflectionLLMResponse
 from app.services.llm_json import generate_json
@@ -28,11 +29,11 @@ class ReflectionAgent:
         self,
         user_input: str,
         user_profile: dict,
-        chat_history: List[Dict],
-        recent_items: List[Dict],
-        recent_conversations: List[Dict],
-        last_reflection: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        chat_history: list[dict],
+        recent_items: list[dict],
+        recent_conversations: list[dict],
+        last_reflection: dict | None = None,
+    ) -> dict[str, Any]:
         """
         Analyze user's history and provide a reflective response.
 
@@ -56,8 +57,7 @@ class ReflectionAgent:
             }
         """
         prompt = self._build_prompt(
-            user_input, user_profile, chat_history, recent_items,
-            recent_conversations, last_reflection
+            user_input, user_profile, chat_history, recent_items, recent_conversations, last_reflection
         )
 
         try:
@@ -92,10 +92,10 @@ class ReflectionAgent:
         self,
         user_input: str,
         user_profile: dict,
-        chat_history: List[Dict],
-        recent_items: List[Dict],
-        recent_conversations: List[Dict],
-        last_reflection: Optional[Dict],
+        chat_history: list[dict],
+        recent_items: list[dict],
+        recent_conversations: list[dict],
+        last_reflection: dict | None,
     ) -> str:
         """Build the reflection analysis prompt with full historical context."""
         goals = user_profile.get("goals", {})
@@ -149,10 +149,10 @@ class ReflectionAgent:
         if last_reflection:
             prev_reflection_text = f"""
 **Previous Reflection Summary:**
-{last_reflection.get('summary', 'None')}
+{last_reflection.get("summary", "None")}
 
 **Previously Identified Patterns:**
-{json.dumps(last_reflection.get('patterns', []), indent=2)}
+{json.dumps(last_reflection.get("patterns", []), indent=2)}
 """
         else:
             prev_reflection_text = "**Previous Reflection:** None (first reflection session)"
@@ -166,9 +166,9 @@ Before writing your response, carefully study ALL the data provided below. Cross
 - How do their recent actions align with their stated goals?
 - What emotional undertones do you detect in their messages?
 
-**User's Life Areas:** {', '.join(life_areas) if life_areas else 'Not specified'}
+**User's Life Areas:** {", ".join(life_areas) if life_areas else "Not specified"}
 **User's Goals:**
-{json.dumps(goals, indent=2) if goals else '  (None specified)'}
+{json.dumps(goals, indent=2) if goals else "  (None specified)"}
 
 **Known Long-Term Facts:**
 {facts_text}

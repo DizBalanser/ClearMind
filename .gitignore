@@ -61,6 +61,7 @@ analyze.md
 changes.md
 /test_*.py
 sampledoc/
+0_backend-quality.txt
 
 # Generated tooling/artifacts
 tools/

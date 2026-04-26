@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+
 from app.database import get_db
-from app.models.user import User
 from app.models.item import Item
 from app.models.item_link import ItemLink
-from app.schemas import GraphAnalyzeResponse, ItemLinkCreate, ItemLinkResponse, GraphData
+from app.models.user import User
+from app.schemas import GraphAnalyzeResponse, GraphData, ItemLinkCreate, ItemLinkResponse
 from app.services.agents.graph_analyzer import graph_analyzer
 from app.utils.dependencies import get_current_user
 
@@ -39,11 +39,7 @@ async def get_graph_data(
             "life_area": item.life_area,
             "status": item.status,
             "priority": item.priority or 5,
-            "tags": [
-                tag
-                for tag in [item.category, item.subcategory, item.life_area, item.status]
-                if tag
-            ],
+            "tags": [tag for tag in [item.category, item.subcategory, item.life_area, item.status] if tag],
             "val": max(1, (item.priority or 5)),  # Node size based on priority
         }
         for item in items
@@ -53,10 +49,14 @@ async def get_graph_data(
     item_ids = {item.id for item in items}
 
     # Get links where both source and target belong to this user
-    links = db.query(ItemLink).filter(
-        ItemLink.source_id.in_(item_ids),
-        ItemLink.target_id.in_(item_ids),
-    ).all()
+    links = (
+        db.query(ItemLink)
+        .filter(
+            ItemLink.source_id.in_(item_ids),
+            ItemLink.target_id.in_(item_ids),
+        )
+        .all()
+    )
 
     links_data = [
         ItemLinkResponse(
@@ -90,11 +90,15 @@ async def create_link(
     if link_data.source_id == link_data.target_id:
         raise HTTPException(status_code=400, detail="Cannot link an item to itself")
 
-    existing_link = db.query(ItemLink).filter(
-        ItemLink.source_id == link_data.source_id,
-        ItemLink.target_id == link_data.target_id,
-        ItemLink.link_type == link_data.link_type,
-    ).first()
+    existing_link = (
+        db.query(ItemLink)
+        .filter(
+            ItemLink.source_id == link_data.source_id,
+            ItemLink.target_id == link_data.target_id,
+            ItemLink.link_type == link_data.link_type,
+        )
+        .first()
+    )
     if existing_link:
         raise HTTPException(status_code=409, detail="Link already exists")
 
@@ -121,14 +125,15 @@ async def analyze_graph(
         return GraphAnalyzeResponse(suggested_links=[], created_count=0, skipped_count=0)
 
     item_ids = {item.id for item in items}
-    existing_links = db.query(ItemLink).filter(
-        ItemLink.source_id.in_(item_ids),
-        ItemLink.target_id.in_(item_ids),
-    ).all()
-    existing_keys = {
-        (link.source_id, link.target_id, _normalize_link_type(link.link_type))
-        for link in existing_links
-    }
+    existing_links = (
+        db.query(ItemLink)
+        .filter(
+            ItemLink.source_id.in_(item_ids),
+            ItemLink.target_id.in_(item_ids),
+        )
+        .all()
+    )
+    existing_keys = {(link.source_id, link.target_id, _normalize_link_type(link.link_type)) for link in existing_links}
 
     graph_items = [
         {
@@ -136,11 +141,7 @@ async def analyze_graph(
             "type": item.category,
             "title": item.title,
             "description": item.description or "",
-            "tags": [
-                tag
-                for tag in [item.category, item.subcategory, item.life_area, item.status]
-                if tag
-            ],
+            "tags": [tag for tag in [item.category, item.subcategory, item.life_area, item.status] if tag],
         }
         for item in items
     ]
