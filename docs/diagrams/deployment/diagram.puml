@@ -1,0 +1,26 @@
+@startuml
+title Deployment Configuration - Phase 2
+skinparam shadowing false
+left to right direction
+
+node "User Device" as Client {
+  artifact "Browser\n(React + Vite SPA)" as Browser
+}
+
+node "Application Host" as Host {
+  node "Frontend Service" as FrontService {
+    artifact "Static assets / Vite build" as FEAssets
+  }
+  node "Backend Service" as BackService {
+    artifact "FastAPI app.main" as API
+  }
+}
+
+database "SQLite Database" as DB
+cloud "External LLM Provider API" as LLM
+
+Browser --> FEAssets : HTTPS
+Browser --> API : HTTPS /api/*
+API --> DB : SQLAlchemy
+API --> LLM : HTTPS API calls
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+title System Architecture - ClearMind
+skinparam shadowing false
+skinparam packageStyle rectangle
+top to bottom direction
+
+package "Presentation Layer" {
+  [React + Vite Frontend] as Frontend
+  [Pages + Layout + Graph UI] as UI
+}
+
+package "API Layer" {
+  [FastAPI app.main] as API
+  [Routes: auth/users/items/chat/\nschedule/graph/profile/dashboard] as Routes
+}
+
+package "Domain & AI Layer" {
+  [Orchestrator Service] as Orchestrator
+  [Agents:\nbrain_dump/reflection/\nscheduler/planner/graph_analyzer] as Agents
+  [Profile Memory Service] as ProfileMemory
+  [LLM JSON Adapter] as LLMJson
+}
+
+package "Data Layer" {
+  database "SQLite via SQLAlchemy" as DB
+  [ORM Models] as Models
+}
+
+cloud "External LLM API" as LLM
+
+Frontend --> API : HTTP/JSON
+API --> Routes
+Routes --> Orchestrator
+Routes --> ProfileMemory
+Routes --> Models
+
+Orchestrator --> Agents
+Orchestrator --> LLMJson
+ProfileMemory --> LLMJson
+
+Agents --> LLM
+LLMJson --> LLM
+
+Routes --> DB
+Models --> DB
+Orchestrator --> DB
+ProfileMemory --> DB
+@enduml

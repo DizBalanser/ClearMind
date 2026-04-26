@@ -1,0 +1,41 @@
+@startuml
+title UI Plan - Screen Navigation Map
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor User
+
+rectangle "Public Flow" {
+  usecase "Landing Page" as Landing
+  usecase "Auth Modal\n(Login/Register)" as Auth
+}
+
+rectangle "Protected Flow" {
+  usecase "Onboarding" as Onboarding
+  usecase "Dashboard" as Dashboard
+  usecase "Chat" as Chat
+  usecase "MyLifeDatabase" as Database
+  usecase "KnowledgeGraph" as Graph
+  usecase "ScheduleView" as Schedule
+  usecase "UserProfile" as Profile
+}
+
+User --> Landing
+User --> Auth
+Auth --> Onboarding : first login
+Auth --> Dashboard : returning user
+
+Dashboard --> Chat
+Dashboard --> Database
+Dashboard --> Schedule
+Dashboard --> Profile
+Database --> Graph
+
+note right of Dashboard
+Layout shell:
+- Sidebar
+- TopNavBar
+- AppLayout background
+end note
+@enduml

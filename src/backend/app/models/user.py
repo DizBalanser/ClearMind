@@ -25,6 +25,9 @@ class User(Base):
     # Relationships
     items = relationship("Item", back_populates="user", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
+    reflections = relationship("Reflection", back_populates="user", cascade="all, delete-orphan")
+    context_entries = relationship("UserContext", back_populates="user", cascade="all, delete-orphan")
+    profile_updates = relationship("ProfileUpdate", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"

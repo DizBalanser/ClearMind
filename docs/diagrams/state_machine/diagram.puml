@@ -1,0 +1,25 @@
+@startuml
+title State Machine - Auth and Chat Session
+skinparam shadowing false
+
+[*] --> Visitor
+Visitor --> Authenticating : submit credentials
+Authenticating --> Authenticated : token issued
+Authenticating --> Visitor : auth failed
+
+Authenticated --> OnboardingPending : first login
+OnboardingPending --> ActiveSession : onboarding completed
+Authenticated --> ActiveSession : returning user
+
+state ActiveSession {
+  [*] --> Idle
+  Idle --> SendingMessage : user sends chat input
+  SendingMessage --> AgentProcessing : route + reasoning
+  AgentProcessing --> UpdatingMemory : memory extraction
+  UpdatingMemory --> RenderingResponse : response ready
+  RenderingResponse --> Idle : user sees output
+}
+
+ActiveSession --> LoggedOut : sign out
+LoggedOut --> Visitor
+@enduml

@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import engine, Base
-from app.routes import auth, users, items, chat
+from app.models import profile_update, user_context
+from app.routes import auth, users, items, chat, schedule, graph, profile, dashboard
 
 # Get settings
 settings = get_settings()
@@ -33,6 +34,10 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(items.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(schedule.router, prefix="/api")
+app.include_router(graph.router, prefix="/api")
+app.include_router(profile.router, prefix="/api")
+app.include_router(dashboard.router, prefix="/api")
 
 
 @app.get("/")

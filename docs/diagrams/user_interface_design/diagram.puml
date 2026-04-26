@@ -1,0 +1,51 @@
+@startuml
+title User Interface Design - Component Hierarchy
+skinparam shadowing false
+left to right direction
+
+package "App Root" {
+  [main.tsx]
+  [App.tsx]
+}
+
+package "Public UI" {
+  [LandingPage]
+  [AuthModal]
+}
+
+package "Protected Shell" {
+  [ProtectedRoute]
+  [Layout]
+  [Sidebar]
+  [TopNavBar]
+  [AppLayout]
+  [SpatialBackground]
+}
+
+package "Feature Pages" {
+  [Dashboard]
+  [Chat]
+  [MyLifeDatabase]
+  [KnowledgeGraph]
+  [ScheduleView]
+  [UserProfile]
+}
+
+[main.tsx] --> [App.tsx]
+[App.tsx] --> [LandingPage]
+[LandingPage] --> [AuthModal]
+
+[App.tsx] --> [ProtectedRoute]
+[ProtectedRoute] --> [Layout]
+[Layout] --> [Sidebar]
+[Layout] --> [TopNavBar]
+[Layout] --> [AppLayout]
+[AppLayout] --> [SpatialBackground]
+
+[Layout] --> [Dashboard]
+[Layout] --> [Chat]
+[Layout] --> [MyLifeDatabase]
+[MyLifeDatabase] --> [KnowledgeGraph]
+[Layout] --> [ScheduleView]
+[Layout] --> [UserProfile]
+@enduml

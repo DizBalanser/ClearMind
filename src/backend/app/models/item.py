@@ -20,8 +20,11 @@ class Item(Base):
     subcategory = Column(String(50), nullable=True)  # obligation, goal, habit, project, creative, etc.
     life_area = Column(String(50), nullable=True)  # career, health, learning, relationships, etc.
     
-    # Scheduling
+    # Scheduling (Phase 2 — used by Scheduler Agent)
     deadline = Column(TIMESTAMP, nullable=True)
+    estimated_duration = Column(Integer, nullable=True)    # minutes
+    scheduled_start = Column(TIMESTAMP, nullable=True)
+    scheduled_end = Column(TIMESTAMP, nullable=True)
     
     # Status tracking
     status = Column(String(50), default="pending")  # pending, in_progress, done, archived
@@ -32,6 +35,8 @@ class Item(Base):
     
     # Relationships
     user = relationship("User", back_populates="items")
+    links_from = relationship("ItemLink", foreign_keys="ItemLink.source_id", back_populates="source", cascade="all, delete-orphan")
+    links_to = relationship("ItemLink", foreign_keys="ItemLink.target_id", back_populates="target", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Item(id={self.id}, title={self.title}, category={self.category})>"

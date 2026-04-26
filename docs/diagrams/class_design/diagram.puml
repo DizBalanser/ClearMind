@@ -1,0 +1,43 @@
+@startuml
+title Class Design - Core Backend Domain
+skinparam shadowing false
+hide empty members
+
+class User
+class Item
+class ItemLink
+class Message
+class Conversation
+class Reflection
+class ProfileUpdate
+class UserContext
+
+class Orchestrator
+class BrainDumpAgent
+class ReflectionAgent
+class SchedulerAgent
+class PlannerAgent
+class GraphAnalyzerAgent
+class ProfileMemoryService
+
+User "1" -- "*" Item
+User "1" -- "*" Message
+User "1" -- "*" Conversation
+User "1" -- "*" Reflection
+User "1" -- "*" ProfileUpdate
+User "1" -- "*" UserContext
+
+Item "1" -- "*" ItemLink : source
+Item "1" -- "*" ItemLink : target
+
+Orchestrator *-- BrainDumpAgent
+Orchestrator *-- ReflectionAgent
+Orchestrator *-- SchedulerAgent
+Orchestrator *-- PlannerAgent
+
+GraphAnalyzerAgent ..> Item
+GraphAnalyzerAgent ..> ItemLink
+
+ProfileMemoryService ..> ProfileUpdate
+ProfileMemoryService ..> UserContext
+@enduml

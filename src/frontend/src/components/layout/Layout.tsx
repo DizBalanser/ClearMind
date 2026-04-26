@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import TopNavBar from './TopNavBar';
+import AppLayout from './AppLayout';
 import { auth } from '../../services/api';
 
 const Layout = () => {
@@ -20,7 +21,7 @@ const Layout = () => {
             try {
                 const user = await auth.getMe();
                 setUserName(user.name || 'User');
-            } catch (e) {
+            } catch {
                 console.error('Failed to fetch user');
             }
         };
@@ -32,22 +33,26 @@ const Layout = () => {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[#f6f6f7]">
-            {/* Sidebar */}
-            <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+        <AppLayout>
+            <div className="flex h-screen overflow-hidden">
+                {/* Sidebar */}
+                <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Nav Bar - visible when sidebar is collapsed */}
-                {sidebarCollapsed && (
-                    <TopNavBar onMenuClick={toggleSidebar} userName={userName} />
-                )}
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* Top Nav Bar - visible when sidebar is collapsed */}
+                    {sidebarCollapsed && (
+                        <TopNavBar onMenuClick={toggleSidebar} userName={userName} />
+                    )}
 
-                <main className="flex-1 flex flex-col overflow-hidden relative">
-                    <Outlet />
-                </main>
+                    <main className="flex-1 flex flex-col overflow-hidden relative">
+                        <div className="page-transition flex min-h-0 flex-1 flex-col">
+                            <Outlet />
+                        </div>
+                    </main>
+                </div>
             </div>
-        </div>
+        </AppLayout>
     );
 };
 

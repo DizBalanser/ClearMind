@@ -7,7 +7,8 @@ const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     { name: 'AI Assistant', href: '/chat', icon: 'smart_toy' },
     { name: 'Database', href: '/database', icon: 'database' },
-    { name: 'Settings', href: '/settings', icon: 'settings' },
+    { name: 'Schedule', href: '/schedule', icon: 'calendar_month' },
+    { name: 'AI Memory', href: '/profile', icon: 'psychology_alt' },
 ];
 
 interface SidebarProps {
@@ -24,7 +25,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
             try {
                 const user = await auth.getMe();
                 setUserName(user.name || 'User');
-            } catch (e) {
+            } catch {
                 console.error('Failed to fetch user');
             }
         };
@@ -39,11 +40,11 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
     if (isCollapsed) return null;
 
     return (
-        <aside className="hidden md:flex w-72 flex-col bg-[#1a1a2e] h-full text-white shrink-0 relative">
+        <aside className="premium-glass hidden md:flex w-72 flex-col h-full text-white shrink-0 relative border-r border-white/10">
             {/* Collapse Button */}
             <button
                 onClick={onToggle}
-                className="absolute -right-3 top-8 z-10 size-6 bg-[#1a1a2e] border border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#2a2a40] transition-colors shadow-md"
+                className="hover-glow absolute -right-3 top-8 z-10 size-6 rounded-full border border-[#14B8A6]/35 bg-[#0d1117]/90 flex items-center justify-center text-[#8b949e] hover:text-white transition-colors shadow-md"
             >
                 <ChevronLeft size={14} />
             </button>
@@ -54,7 +55,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
                     <img src="/logo.png" alt="ClearMind" className="size-10 rounded-xl shadow-lg" />
                     <div>
                         <h1 className="text-lg font-bold leading-none tracking-tight">ClearMind</h1>
-                        <p className="text-slate-400 text-xs mt-1">Personal Organizer</p>
+                        <p className="text-[#7d8590] text-xs mt-1">AI Command Center</p>
                     </div>
                 </div>
 
@@ -66,9 +67,9 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
                             <Link
                                 key={item.name}
                                 to={item.href}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${isActive
-                                    ? 'bg-white/10 text-white'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                className={`hover-glow flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${isActive
+                                    ? 'border border-[#14B8A6]/35 bg-[#14B8A6]/15 text-[#5eead4] shadow-[0_0_24px_rgba(20,184,166,0.12)]'
+                                    : 'border border-transparent text-[#8b949e] hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 <span className={`material-symbols-outlined ${isActive ? 'filled' : ''}`}>
@@ -82,10 +83,10 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
             </div>
 
             {/* User Section */}
-            <div className="mt-auto p-6 border-t border-white/5">
+            <div className="mt-auto p-6 border-t border-white/10">
                 <Link
                     to="/profile"
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer transition-colors"
+                    className="hover-glow flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer transition-colors"
                 >
                     <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shadow-md">
                         {userName.charAt(0).toUpperCase()}
@@ -97,7 +98,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
                 </Link>
                 <button
                     onClick={handleLogout}
-                    className="w-full mt-3 flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-red-400 hover:bg-white/5 transition-colors text-sm font-medium"
+                    className="hover-glow w-full mt-3 flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#8b949e] hover:text-red-400 hover:bg-white/5 transition-colors text-sm font-medium"
                 >
                     <span className="material-symbols-outlined text-[20px]">logout</span>
                     Sign out

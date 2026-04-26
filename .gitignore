@@ -57,3 +57,12 @@ yarn.lock
 #etc
 project_explanation.md
 todo.md
+analyze.md
+changes.md
+/test_*.py
+sampledoc/
+
+# Generated tooling/artifacts
+tools/
+.coverage*
+coverage.xml

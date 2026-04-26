@@ -1,7 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
-import type { AuthResponse, User, Item } from '../types';
+import type {
+    AuthResponse,
+    User,
+    Item,
+    AgentChatResponse,
+    ScheduleBlock,
+    GraphData,
+    GraphAnalyzeResponse,
+    GraphLinkType,
+    UserContextEntry,
+    UserContextCreatePayload,
+    UserContextUpdatePayload,
+    UserProfileMemory,
+    ProfileQuestion,
+    ProfileQuestionAnswer,
+    DashboardAnalytics,
+} from '../types';
 
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:8000/api';
 
 // Create axios instance with interceptor for JWT
 const api = axios.create({
@@ -40,8 +57,12 @@ export const auth = {
 };
 
 export const chat = {
-    send: async (message: string): Promise<any> => {
+    send: async (message: string): Promise<AgentChatResponse> => {
         const { data } = await api.post('/chat', { message });
+        return data;
+    },
+    getHistory: async (limit: number = 10): Promise<any[]> => {
+        const { data } = await api.get('/chat/history', { params: { limit } });
         return data;
     },
 };
@@ -64,6 +85,97 @@ export const items = {
     },
     updateStatus: async (id: number, status: string): Promise<Item> => {
         const { data } = await api.patch(`/items/${id}/status`, { status });
+        return data;
+    },
+};
+
+// ============================================================================
+// Phase 2 — Multi-Agent Services
+// ============================================================================
+
+export const schedule = {
+    get: async (startDate?: string, endDate?: string): Promise<ScheduleBlock[]> => {
+        const params: any = {};
+        if (startDate) params.start_date = startDate;
+        if (endDate) params.end_date = endDate;
+        const { data } = await api.get('/schedule', { params });
+        return data;
+    },
+    updateBlock: async (itemId: number, updateData: Partial<ScheduleBlock>): Promise<ScheduleBlock> => {
+        const { data } = await api.put(`/schedule/${itemId}`, updateData);
+        return data;
+    },
+    exportIcs: async (): Promise<Blob> => {
+        const response = await api.get('/schedule/export', { responseType: 'blob' });
+        return response.data;
+    },
+};
+
+export const graph = {
+    getData: async (): Promise<GraphData> => {
+        const { data } = await api.get('/graph');
+        return {
+            nodes: data.nodes ?? [],
+            links: (data.links ?? []).map((link: any) => ({
+                ...link,
+                source: link.source ?? link.source_id,
+                target: link.target ?? link.target_id,
+            })),
+        };
+    },
+    createLink: async (sourceId: number, targetId: number, linkType: GraphLinkType = 'relates_to'): Promise<any> => {
+        const { data } = await api.post('/graph/links', {
+            source_id: sourceId,
+            target_id: targetId,
+            link_type: linkType,
+        });
+        return data;
+    },
+    deleteLink: async (linkId: number): Promise<void> => {
+        await api.delete(`/graph/links/${linkId}`);
+    },
+    analyze: async (): Promise<GraphAnalyzeResponse> => {
+        const { data } = await api.post('/graph/analyze');
+        return {
+            ...data,
+            suggested_links: (data.suggested_links ?? []).map((link: any) => ({
+                ...link,
+                source: link.source ?? link.source_id,
+                target: link.target ?? link.target_id,
+            })),
+        };
+    },
+};
+
+export const profileMemory = {
+    get: async (): Promise<UserProfileMemory> => {
+        const { data } = await api.get('/profile');
+        return data;
+    },
+    createContext: async (payload: UserContextCreatePayload): Promise<UserContextEntry> => {
+        const { data } = await api.post('/profile/context', payload);
+        return data;
+    },
+    updateContext: async (id: number, payload: UserContextUpdatePayload): Promise<UserContextEntry> => {
+        const { data } = await api.put(`/profile/context/${id}`, payload);
+        return data;
+    },
+    deleteContext: async (id: number): Promise<void> => {
+        await api.delete(`/profile/context/${id}`);
+    },
+    getQuestions: async (): Promise<ProfileQuestion[]> => {
+        const { data } = await api.get('/profile/questions');
+        return data;
+    },
+    submitQuestionnaire: async (answers: ProfileQuestionAnswer[]): Promise<UserContextEntry[]> => {
+        const { data } = await api.post('/profile/questions', { answers });
+        return data;
+    },
+};
+
+export const dashboard = {
+    getAnalytics: async (days: number = 60): Promise<DashboardAnalytics> => {
+        const { data } = await api.get('/dashboard/analytics', { params: { days } });
         return data;
     },
 };

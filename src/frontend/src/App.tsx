@@ -7,8 +7,8 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Chat from './pages/Chat';
 import MyLifeDatabase from './pages/MyLifeDatabase';
-import Settings from './pages/Settings';
-import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
+import ScheduleView from './pages/ScheduleView';
 import Layout from './components/layout/Layout';
 
 // Create a client
@@ -44,8 +44,8 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/database" element={<MyLifeDatabase />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/schedule" element={<ScheduleView />} />
+              <Route path="/profile" element={<UserProfile />} />
             </Route>
 
             {/* Catch-all redirect */}

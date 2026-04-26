@@ -1,0 +1,43 @@
+@startuml
+title Package Structure - Backend and Frontend
+skinparam shadowing false
+skinparam packageStyle rectangle
+left to right direction
+
+package "frontend" {
+  package "src/pages" as FPages
+  package "src/components" as FComponents
+  package "src/services" as FServices
+  package "src/types" as FTypes
+}
+
+package "backend/app" {
+  package "routes" as BRoutes
+  package "services" as BServices
+  package "services/agents" as BAgents
+  package "models" as BModels
+  package "utils" as BUtils
+  package "schemas" as BSchemas
+  package "database" as BDatabase
+}
+
+FPages --> FComponents
+FPages --> FServices
+FPages --> FTypes
+FComponents --> FServices
+FServices --> FTypes
+
+FServices --> BRoutes : API calls
+
+BRoutes --> BServices
+BRoutes --> BModels
+BRoutes --> BSchemas
+BRoutes --> BUtils
+BRoutes --> BDatabase
+
+BServices --> BAgents
+BServices --> BModels
+BServices --> BSchemas
+BServices --> BDatabase
+BUtils --> BDatabase
+@enduml

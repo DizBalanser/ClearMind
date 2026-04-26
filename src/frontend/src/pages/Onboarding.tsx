@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/api';
+import AppLayout from '../components/layout/AppLayout';
 
 const Onboarding = () => {
     const navigate = useNavigate();
@@ -41,22 +42,24 @@ const Onboarding = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+        <AppLayout>
+        <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 text-[#e6edf3]">
+            <div className="premium-card max-w-md w-full space-y-8 p-8">
                 <div className="text-center">
                     <img src="/logo.png" alt="Logo" className="mx-auto h-12 w-12 object-contain" />
-                    <h2 className="mt-6 text-3xl font-extrabold text-primary">
+                    <p className="mt-6 text-xs font-semibold uppercase tracking-[0.22em] text-[#5eead4]">Digital Twin Setup</p>
+                    <h2 className="mt-2 text-3xl font-extrabold neon-gradient-text">
                         Setup your Digital Twin
                     </h2>
-                    <p className="mt-2 text-sm text-secondary">
+                    <p className="mt-2 text-sm text-[#8b949e]">
                         Step {step} of 3
                     </p>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-[#0d1117] rounded-full h-2.5 border border-white/10 overflow-hidden">
                     <div
-                        className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-[#14B8A6] to-[#8b5cf6] h-2.5 rounded-full transition-all duration-300 shadow-[0_0_18px_rgba(20,184,166,0.45)]"
                         style={{ width: `${(step / 3) * 100}%` }}
                     ></div>
                 </div>
@@ -64,10 +67,10 @@ const Onboarding = () => {
                 <div className="mt-8 space-y-6">
                     {step === 1 && (
                         <div className="animate-fade-in">
-                            <h3 className="text-lg font-medium text-primary mb-4">What do you do?</h3>
+                            <h3 className="text-lg font-medium text-[#f0f6fc] mb-4">What do you do?</h3>
                             <input
                                 type="text"
-                                className="block w-full rounded-md border-0 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent sm:text-sm sm:leading-6"
+                                className="input-field block w-full py-3 sm:text-sm sm:leading-6"
                                 placeholder="e.g. Student, Software Engineer, Artist"
                                 value={profile.occupation}
                                 onChange={(e) => setProfile({ ...profile, occupation: e.target.value })}
@@ -77,10 +80,10 @@ const Onboarding = () => {
 
                     {step === 2 && (
                         <div className="animate-fade-in">
-                            <h3 className="text-lg font-medium text-primary mb-4">What are your main goals?</h3>
+                            <h3 className="text-lg font-medium text-[#f0f6fc] mb-4">What are your main goals?</h3>
                             <textarea
                                 rows={4}
-                                className="block w-full rounded-md border-0 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent sm:text-sm sm:leading-6"
+                                className="input-field block w-full py-3 sm:text-sm sm:leading-6"
                                 placeholder="e.g. Finish thesis, Run a marathon, Learn Japanese"
                                 value={profile.goals}
                                 onChange={(e) => setProfile({ ...profile, goals: e.target.value })}
@@ -90,10 +93,10 @@ const Onboarding = () => {
 
                     {step === 3 && (
                         <div className="animate-fade-in">
-                            <h3 className="text-lg font-medium text-primary mb-4">How would you describe yourself?</h3>
+                            <h3 className="text-lg font-medium text-[#f0f6fc] mb-4">How would you describe yourself?</h3>
                             <textarea
                                 rows={4}
-                                className="block w-full rounded-md border-0 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent sm:text-sm sm:leading-6"
+                                className="input-field block w-full py-3 sm:text-sm sm:leading-6"
                                 placeholder="e.g. I'm organized but procrastinate on big tasks. I'm a night owl."
                                 value={profile.personality}
                                 onChange={(e) => setProfile({ ...profile, personality: e.target.value })}
@@ -104,13 +107,14 @@ const Onboarding = () => {
                     <button
                         onClick={handleNext}
                         disabled={loading}
-                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 transition-all"
+                        className="premium-button w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white bg-[#14B8A6] disabled:opacity-50 transition-all"
                     >
                         {loading ? 'Finalizing...' : (step === 3 ? 'Complete Setup' : 'Next Step')}
                     </button>
                 </div>
             </div>
         </div>
+        </AppLayout>
     );
 };
 

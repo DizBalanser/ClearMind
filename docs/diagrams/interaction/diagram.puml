@@ -1,0 +1,30 @@
+@startuml
+title Interaction Design - Chat to Agent Response
+skinparam shadowing false
+
+actor User
+participant "Frontend Chat Page" as FE
+participant "FastAPI /api/chat" as API
+participant "Orchestrator" as ORCH
+participant "Agent" as AGENT
+participant "ProfileMemoryService" as MEM
+database "SQLite DB" as DB
+participant "LLM API" as LLM
+
+User -> FE : Submit message
+FE -> API : POST /api/chat
+API -> DB : Load recent messages + profile
+API -> ORCH : route_and_execute(input, context)
+ORCH -> AGENT : process(...)
+AGENT -> LLM : generate structured output
+LLM --> AGENT : response payload
+AGENT --> ORCH : classified items + reply
+ORCH --> API : normalized response
+API -> MEM : extract memory candidates
+MEM -> LLM : extract/update profile facts
+LLM --> MEM : memory candidates
+MEM -> DB : save profile_update + user_context
+API -> DB : save user/assistant messages
+API --> FE : AgentChatResponse
+FE --> User : Render message, items, schedule/reflection
+@enduml

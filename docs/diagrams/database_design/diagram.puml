@@ -1,0 +1,80 @@
+@startuml
+title Database Design - Core Entities
+skinparam shadowing false
+hide methods
+
+entity user {
+  *id : int <<PK>>
+  --
+  email : string
+  name : string
+  hashed_password : string
+}
+
+entity item {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  title : string
+  category : string
+  status : string
+}
+
+entity item_link {
+  *id : int <<PK>>
+  --
+  source_item_id : int <<FK>>
+  target_item_id : int <<FK>>
+  relation_type : string
+}
+
+entity message {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  role : string
+  content : string
+  timestamp : datetime
+}
+
+entity conversation {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  messages_json : json
+}
+
+entity reflection {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  summary : text
+}
+
+entity profile_update {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  category : string
+  fact : text
+  created_at : datetime
+}
+
+entity user_context {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  memory_key : string
+  memory_value_json : json
+}
+
+user ||--o{ item
+user ||--o{ message
+user ||--o{ conversation
+user ||--o{ reflection
+user ||--o{ profile_update
+user ||--o{ user_context
+
+item ||--o{ item_link : source
+item ||--o{ item_link : target
+@enduml

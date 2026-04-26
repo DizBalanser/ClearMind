@@ -1,0 +1,39 @@
+@startuml
+title Use Case Diagram - ClearMind Phase 2
+left to right direction
+skinparam shadowing false
+
+actor "End User" as User
+actor "LLM Provider" as LLM
+
+rectangle "ClearMind System" {
+  usecase "Register / Login" as UCAuth
+  usecase "Complete Onboarding" as UCOnboarding
+  usecase "Send Chat Message" as UCChat
+  usecase "Generate Action Items" as UCItems
+  usecase "Save Profile Memory" as UCMemory
+  usecase "View Dashboard Analytics" as UCDashboard
+  usecase "Manage Life Database Items" as UCDatabase
+  usecase "Analyze Knowledge Graph" as UCGraph
+  usecase "Generate Schedule" as UCSchedule
+  usecase "Update User Profile Context" as UCProfile
+}
+
+User --> UCAuth
+User --> UCOnboarding
+User --> UCChat
+User --> UCDashboard
+User --> UCDatabase
+User --> UCGraph
+User --> UCSchedule
+User --> UCProfile
+
+UCChat .> UCItems : <<include>>
+UCChat .> UCMemory : <<include>>
+UCGraph .> UCItems : <<extend>>
+
+LLM --> UCChat
+LLM --> UCGraph
+LLM --> UCSchedule
+LLM --> UCMemory
+@enduml

@@ -63,7 +63,7 @@ The focus is on demonstrating **how personalization and contextual memory improv
 - Set up GitLab repository and define milestones  
 
 ### 📦 Deliverables
-- `/docs/diagrams/system_architecture.png` — system diagram  
+- `/docs/diagrams/system_architecture/diagram.png` — system diagram  
 - `/docs/milestones.md` — milestone plan  
 - `/src/` — initial project skeleton  
 - `README.md` — project overview and setup instructions  
@@ -87,8 +87,8 @@ The focus is on demonstrating **how personalization and contextual memory improv
 
 ### 📦 Deliverables
 - `/src/backend/` — functional backend with endpoints  
-- `/src/models/` — reasoning and memory logic  
-- `/tests/` — basic backend tests  
+- `/src/backend/app/services/` and `/src/backend/app/models/` — reasoning and memory logic  
+- `/src/backend/tests/` — basic backend tests  
 - `/docs/developer_notes/backend_overview.md`  
 
 ### ✅ Acceptance Criteria
@@ -112,7 +112,7 @@ The focus is on demonstrating **how personalization and contextual memory improv
 - `/src/frontend/` — working chat-based UI  
 - Connected backend API (end-to-end system)  
 - `/docs/user_manual/interface_guide.md`  
-- Partial thesis draft (Methodology + Results sections)  
+- `/docs/thesis/Methodology_Draft.md` and `/docs/thesis/Results_Draft.md` — partial thesis draft  
 
 ### ✅ Acceptance Criteria
 - End-to-end system functional  
@@ -132,10 +132,10 @@ The focus is on demonstrating **how personalization and contextual memory improv
 - Submit final thesis draft to supervisor  
 
 ### 📦 Deliverables
-- `/results/` — test results and evaluation summaries  
+- `/results/evaluation_summary.md` and `/results/test_coverage_report.md` — test results and evaluation summaries  
 - `/docs/user_manual/final_manual.md`  
-- Final prototype and recorded demo (if required)  
-- Complete thesis draft  
+- Recorded demo walkthrough (submission artifact)  
+- `/docs/thesis/Complete_Thesis_Draft.md`  
 
 ### ✅ Acceptance Criteria
 - Fully functional and tested prototype  
