@@ -1,0 +1,170 @@
+\chapter{Detailed User Stories}
+
+\section{Purpose}
+
+This appendix preserves the detailed user story set used during the final prototype validation. The main body of the thesis summarizes the stories, while this appendix records acceptance criteria and edge cases in a form that can be checked during supervisor review or defense preparation.
+
+\section{US-01: Authenticate and Access Protected Workspace}
+
+\textbf{Story.} As an authenticated user, I want to sign in and access protected pages, so that my personal data remains private and available only to me.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given I am on the public landing page, when I submit valid credentials, then the system issues a token and grants access to protected routes.
+  \item Given I am authenticated, when I request my profile, then I receive only my own user data.
+  \item Given I refresh a protected page with a valid session, then the protected layout remains available.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given credentials are invalid, when login is submitted, then the system returns an authentication error and does not create a session.
+  \item Given no token is present, when I open a protected route, then I am redirected away from protected content.
+  \item Given a token is expired or invalid, when a protected API call is made, then the backend rejects the request and the frontend preserves a recoverable state.
+\end{itemize}
+
+\section{US-02: Capture Thoughts Through Chat}
+
+\textbf{Story.} As a productivity-focused user, I want to submit free-form messages in chat, so that I can transform unstructured thoughts into actionable outputs.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given I am authenticated, when I send non-empty text, then the orchestrator processes the input and returns a structured assistant response.
+  \item Given the assistant returns extracted items, when the response is displayed, then I can review item metadata such as category, priority, and description.
+  \item Given the assistant returns memory candidates, when the response is displayed, then I can decide whether those candidates should be accepted.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given the input is empty or whitespace, when send is triggered, then the UI does not submit the request.
+  \item Given backend processing fails, when the request completes with an error, then the UI shows a graceful fallback message instead of crashing.
+  \item Given the external LLM API times out or fails, when the orchestrator cannot obtain a valid model response, then the API returns a safe fallback and the session remains usable.
+\end{itemize}
+
+\section{US-03: Persist Conversation History}
+
+\textbf{Story.} As a returning user, I want to retrieve recent chat history, so that I can continue work without losing context.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given I have prior messages, when I open the chat page, then recent messages are loaded and displayed chronologically.
+  \item Given a new message exchange occurs, when persistence succeeds, then both user and assistant messages are stored.
+  \item Given a later request needs context, when the backend prepares the prompt, then recent history can be included according to service rules.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given history retrieval fails, when chat initializes, then the UI logs the failure and preserves a usable empty/default state.
+  \item Given malformed history payloads are returned, when rendering starts, then the UI does not crash and skips invalid entries.
+  \item Given the user has no prior messages, when chat initializes, then the page shows a valid empty conversation state.
+\end{itemize}
+
+\section{US-04: Manage Life Database Items}
+
+\textbf{Story.} As an organized user, I want to create, update, and delete tasks, ideas, and thoughts, so that I can maintain a structured personal knowledge base.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given valid item data, when I create an item, then it is stored and appears in the database list.
+  \item Given an existing item, when I edit status or content, then updates are persisted and reflected in the UI.
+  \item Given an existing item, when I confirm deletion, then it is removed from persistent storage.
+  \item Given I use filters, when the item set changes, then the displayed results match the selected category, status, or subcategory.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given an API mutation fails, when save or delete is attempted, then the UI keeps prior state and surfaces a recoverable error path.
+  \item Given filters produce no results, when the list is rendered, then the UI provides a valid empty-state response.
+  \item Given the user attempts to edit another user's item through an invalid request, then backend ownership checks prevent the operation.
+\end{itemize}
+
+\section{US-05: Build and Analyze Knowledge Graph}
+
+\textbf{Story.} As an analytical user, I want to view and refine links between my items, so that I can discover relationships and improve planning decisions.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given I own multiple items, when I open the graph view, then nodes and valid links are returned for my account only.
+  \item Given two valid items, when I create a manual link, then the link is persisted and visible in subsequent graph fetches.
+  \item Given sufficient item context, when I run graph analysis, then high-confidence AI-suggested links are created or proposed according to service rules.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given I attempt a self-link, when create-link is requested, then the API rejects it with a validation error.
+  \item Given a duplicate link exists, when create-link is requested, then the API returns a conflict response.
+  \item Given graph analysis receives fewer than two items, when analyze is requested, then the API returns a valid empty result without failure.
+  \item Given the AI graph analyzer fails, when the request is processed, then existing graph data remains unchanged.
+\end{itemize}
+
+\section{US-06: Maintain Global Profile Memory}
+
+\textbf{Story.} As a user, I want to review and curate long-term profile facts, so that future assistant responses better reflect my identity, constraints, and goals.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given existing context entries, when I open profile memory, then active context and recent update history are visible.
+  \item Given a valid new fact, when I submit context creation, then the fact is persisted with category metadata.
+  \item Given an existing context entry, when I update or delete it, then changes are committed and visible on reload.
+  \item Given questionnaire answers, when I submit reviewed responses, then valid answers are converted into context entries.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given a fact is empty, when create or update is submitted, then the API rejects the request with clear error detail.
+  \item Given a context ID is invalid, when update or delete is requested, then the API returns not-found and does not alter data.
+  \item Given profile-memory extraction fails due to LLM issues, when candidate generation is attempted, then the system fails safely and keeps core chat functionality available.
+\end{itemize}
+
+\section{US-07: Generate and Export Schedule}
+
+\textbf{Story.} As a user with planning needs, I want to view scheduled blocks and export them as calendar files, so that I can execute plans outside the app.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given schedule blocks exist, when I open schedule view, then blocks are grouped and displayed by date and time.
+  \item Given schedule export is requested, when export succeeds, then an \texttt{.ics} file is downloaded.
+  \item Given a scheduler response is generated from chat, when the frontend receives it, then schedule-related information is displayed in an understandable form.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given no schedule is available, when schedule view loads, then the UI displays an actionable empty-state message.
+  \item Given export fails due to an API or network error, when export is requested, then the UI handles the failure without breaking navigation.
+  \item Given schedule blocks contain incomplete data, when rendering occurs, then the UI should avoid crashing and show safe defaults where appropriate.
+\end{itemize}
+
+\section{US-08: Consume Dashboard Insights}
+
+\textbf{Story.} As a decision-making user, I want telemetry and trend views, so that I can monitor productivity and memory or graph dynamics over time.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given analytics data is available, when dashboard loads, then telemetry cards and charts render correctly.
+  \item Given item status changes, when I toggle completion, then dashboard data refreshes and reflects updated signals.
+  \item Given profile or graph activity exists, when dashboard summarizes the workspace, then the user can understand recent activity without opening every page.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given analytics fetch fails, when dashboard initializes, then the UI exits loading state and remains navigable.
+  \item Given partial analytics payloads, when rendering occurs, then defaults are applied and the dashboard remains stable.
+  \item Given the user is new and has no data, when the dashboard loads, then it shows empty-state guidance rather than misleading metrics.
+\end{itemize}
+
+\section{US-09: Reliable Thesis Presentation}
+
+\textbf{Story.} As a presenter, I want a deterministic demonstration path, so that I can deliver a stable thesis demo even if network or external APIs are unstable.
+
+\textbf{Acceptance criteria.}
+\begin{itemize}
+  \item Given the defense walkthrough is prepared, when the demonstration starts, then representative data is already available.
+  \item Given live model behavior is unstable, when the recorded walkthrough is used, then the key flows can still be reviewed by the examiner.
+  \item Given screenshots are included in the thesis, when the PDF is reviewed offline, then the reader can inspect the main workflows without running the project.
+\end{itemize}
+
+\textbf{Edge and error cases.}
+\begin{itemize}
+  \item Given the backend is unavailable during a live demonstration, when the recorded walkthrough is available, then the presenter can still explain completed functionality.
+  \item Given screenshots contain sensitive data, when final assets are prepared, then they must be recaptured with demonstration values.
+  \item Given final images are missing during draft compilation, when the LaTeX source is built, then placeholders identify the required assets instead of failing the document build.
+\end{itemize}

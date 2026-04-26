@@ -1,0 +1,84 @@
+\chapter{Introduction}
+
+\section{Problem Context}
+
+Productivity and self-management are increasingly mediated by digital tools. A student, developer, researcher, or knowledge worker may use a calendar for time, a note-taking application for ideas, a task manager for obligations, a messaging tool for communication, and a dashboard or spreadsheet for personal tracking. Each tool may be useful in isolation, but the combined workflow often creates fragmentation. The user must remember where information was stored, decide which task is important, translate vague thoughts into structured records, and repeatedly synchronize the same intention across multiple systems. This manual effort is itself a cognitive cost.
+
+The problem becomes more visible when the user works under time pressure. A thought such as ``I need to prepare the thesis demo, review backend tests, answer my supervisor, and fix the schedule for next week'' is not naturally structured. Traditional software expects the user to decompose it into separate task records, assign categories, decide priorities, perhaps create calendar blocks, and later review whether anything was forgotten. The user becomes the integration layer between intention and action.
+
+Recent progress in large language models has created a practical opportunity to reduce this burden. Transformer-based models can interpret natural language, summarize context, and produce structured output from informal input \cite{vaswani2017attention,brown2020language}. At the same time, these systems are not sufficient by themselves. A generic model does not automatically know a user's commitments, personal constraints, habits, preferred working style, or prior decisions. It also cannot be trusted to persist important facts without explicit application-level control. Therefore, a useful productivity assistant must combine language understanding with a controlled memory model, stable software architecture, and user-facing mechanisms for reviewing and correcting the assistant's assumptions.
+
+This thesis addresses that need by designing and implementing ClearMind, a Personal Digital Twin Assistant for productivity and self-management. The phrase ``personal digital twin'' is used in this thesis in a pragmatic software-engineering sense. It does not mean a complete psychological simulation of a person. Instead, it means a digital assistant that maintains selected, user-approved context about goals, constraints, preferences, and activities, and uses that context to provide more relevant support over time. In this interpretation, the system acts as a lightweight, editable operational reflection of the user.
+
+\section{Motivation}
+
+The motivation for the project is both practical and research-oriented. The practical motivation is that many people already use digital tools for planning, but the experience remains reactive and scattered. The user has to decide when to create a task, when to open the calendar, when to record a reflection, and when to reorganize priorities. If a conversational assistant can convert natural language into useful artifacts, the first step of organization becomes easier. If it can remember stable context, later responses can become less generic.
+
+The research motivation is the design question behind such a system: how can an applied AI prototype combine large-language-model reasoning with conventional web engineering so that the result is useful, explainable, and testable? Foundation models are powerful but introduce risks such as hallucination, unstable latency, and non-deterministic responses \cite{bommasani2021foundation}. A thesis prototype cannot rely on the model as a black box only. It needs routing, schemas, persistence, error handling, and evaluation evidence.
+
+The project also connects to a broader software-design challenge. A modern assistant should not be a single monolithic prompt. It should have boundaries. The user interface should handle authentication, navigation, loading states, and recoverable errors. The backend should expose typed API contracts. The data layer should preserve ownership and long-term memory. The AI layer should be modular enough that a brain-dump workflow, a scheduler workflow, and a reflection workflow can evolve separately. These constraints make the project suitable as a full-stack thesis topic rather than a simple prompt-engineering experiment.
+
+\section{Thesis Objective}
+
+The main objective of the thesis is to design, implement, and evaluate a working Personal Digital Twin Assistant that demonstrates personalized reasoning and task automation for productivity support. The final prototype is expected to support a user who wants to capture thoughts, organize tasks and ideas, review a personal knowledge base, generate schedules, maintain profile memory, and inspect productivity-related dashboard information.
+
+The thesis has the following concrete objectives:
+
+\begin{itemize}
+  \item Define functional and non-functional requirements for a personal productivity assistant that combines conversation, memory, and structured task support.
+  \item Design a modular architecture with a React frontend, FastAPI backend, SQLAlchemy persistence, and LLM-based service layer.
+  \item Implement the core workflows: authentication, chat orchestration, life database management, knowledge graph analysis, schedule generation, profile memory curation, and dashboard analytics.
+  \item Establish traceability between requirements, implementation modules, test evidence, and thesis documentation.
+  \item Evaluate the prototype through functional validation, automated backend tests, coverage reporting, API documentation, and qualitative usability observations.
+\end{itemize}
+
+The expected result is not a production-grade commercial assistant. The scope is a proof-of-concept prototype that is sufficiently complete for academic evaluation and demonstration. The system should be stable enough to show end-to-end workflows, but the thesis also explicitly documents limitations and future work.
+
+\section{Research Questions}
+
+The implementation is guided by four research and engineering questions.
+
+\textbf{RQ1: How can unstructured personal input be transformed into structured productivity artifacts?} This question concerns the brain-dump workflow. The system should accept natural-language input and return organized items, schedules, reflections, or memory suggestions without requiring the user to manually choose a rigid form first.
+
+\textbf{RQ2: How can long-term personal context be represented safely enough for a thesis prototype?} This question concerns the memory layer. The assistant should not silently rewrite the user's identity or assumptions. It should store categorized facts, expose them for review, and allow correction or deletion.
+
+\textbf{RQ3: How can an LLM-based assistant be integrated into a conventional full-stack architecture?} This question concerns engineering boundaries. The system needs routes, schemas, services, models, and tests so that the AI part is one component of a larger application rather than the whole architecture.
+
+\textbf{RQ4: How can the resulting prototype be evaluated with evidence available in a student thesis project?} This question concerns realistic validation. The thesis uses functional walkthroughs, automated tests, coverage, CI configuration, API documentation, and qualitative observations rather than claiming statistically broad user-study results.
+
+\section{Project Scope}
+
+The implemented system is named ClearMind. Its core scope includes the following modules.
+
+\begin{itemize}
+  \item A public landing page and authentication flow for entering the protected workspace.
+  \item A dashboard that provides activity and telemetry summaries.
+  \item A chat interface that sends user input to an orchestrated backend.
+  \item A life database for tasks, ideas, and thoughts.
+  \item A knowledge graph view for relationships between stored items.
+  \item A schedule view with generated planning blocks and export support.
+  \item A profile memory page where long-term context can be created, reviewed, updated, and deleted.
+  \item Backend tests, API documentation export, and CI-quality evidence for final thesis validation.
+\end{itemize}
+
+The scope intentionally excludes several production concerns. The prototype does not attempt to implement enterprise-grade multi-tenant deployment, advanced encryption key management, mobile-native clients, or a statistically significant longitudinal user study. SQLite is used as the development database, which is adequate for the thesis prototype but not the final answer for high-concurrency production. External LLM calls are treated as controlled dependencies and are mocked in automated tests where needed.
+
+\section{Contribution}
+
+The thesis makes five contributions.
+
+First, it provides a requirement analysis for a memory-aware productivity assistant. This includes functional requirements, non-functional requirements, user stories, and traceability to implementation modules.
+
+Second, it defines a layered architecture that combines frontend interaction, backend API routes, a service layer, specialized AI agents, and persistence. The architecture is intentionally conventional in its software boundaries so that the AI capability can be tested and maintained.
+
+Third, it implements a working prototype that demonstrates the main end-to-end workflows. The assistant can process chat messages, route requests to specialized agents, store user-owned data, show profile memory, expose graph relationships, and generate schedule outputs.
+
+Fourth, it documents a validation approach suitable for an applied AI thesis. The evaluation includes functional scenario checks, backend coverage evidence, CI configuration, and API documentation export.
+
+Fifth, it reflects on ethical and practical constraints. A personal digital twin assistant handles sensitive user context by design. The thesis therefore discusses privacy, user control, memory correction, external provider risk, and the limits of personalization.
+
+\section{Document Structure}
+
+The remainder of the thesis is organized as follows. Chapter 2 reviews background concepts related to digital twins, conversational agents, LLMs, personal information management, and usability. Chapter 3 defines the requirements and analysis artifacts, including functional requirements, non-functional requirements, user stories, and use cases. Chapter 4 presents the system design, including architecture, data model, service decomposition, interaction flows, and UI structure. Chapter 5 describes the implementation in detail across frontend, backend, persistence, AI orchestration, memory, API documentation, and deployment. Chapter 6 evaluates the prototype through functional, technical, and qualitative evidence. Chapter 7 concludes the thesis and identifies future work.
+
+The appendices provide a screenshot and visual-asset checklist and a detailed traceability matrix. These appendices are intended to support final review and defense preparation by making the evidence package explicit.

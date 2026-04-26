@@ -1,0 +1,79 @@
+\chapter{Background and Related Work}
+
+\section{Personal Information Management}
+
+Personal information management studies how people acquire, organize, retrieve, and use information in their everyday lives. In productivity software, this includes tasks, reminders, notes, goals, appointments, documents, and contextual signals such as deadlines or priorities. The central challenge is not merely storing data. The harder problem is making the right information available at the right time with low effort.
+
+Traditional productivity systems usually separate capture, organization, and execution. A task manager stores obligations, a calendar stores time blocks, and a notes application stores unstructured knowledge. This separation is understandable from a software design perspective, but it creates a burden for the user. When the user records a vague thought, the system often cannot decide whether the thought is a task, an idea, a reflection, a long-term goal, or background context. The user must convert intention into the vocabulary of the tool.
+
+Methods such as Getting Things Done emphasize the importance of externalizing thoughts and regularly reviewing commitments \cite{allen2015getting}. These methods are effective because they reduce the amount of information the user must keep in working memory. However, they still require disciplined manual processing. A personal assistant can support the same principle by turning unstructured input into structured artifacts, while leaving the final decision to the user.
+
+This thesis builds on that idea. ClearMind is not intended to replace personal responsibility or planning discipline. Instead, it provides an interface that makes capture and organization faster. The system accepts informal input, classifies it into useful categories, and stores the result in a structured database. The design goal is to reduce friction at the moment when the user is most likely to abandon organization because the cost of using a formal tool feels too high.
+
+\section{Digital Twin Concept}
+
+The term digital twin originally refers to a digital representation of a physical object or system, often used in engineering, manufacturing, and cyber-physical systems \cite{grieves2017digital,schroeder2016digital}. A digital twin is valuable when it mirrors relevant properties of the real object and supports simulation, monitoring, or decision-making. It does not need to be a perfect copy. It needs to preserve the information that is useful for the target task.
+
+In this thesis, the digital twin idea is applied to a person in a limited and careful way. The goal is not to create a complete model of a human being. Such a claim would be technically unrealistic and ethically problematic. Instead, the assistant maintains an operational representation of selected user context: goals, constraints, preferences, recurring life areas, tasks, ideas, reflections, and prior interactions. This representation supports productivity decisions.
+
+The term ``personal digital twin'' is therefore used as a design metaphor with concrete implementation boundaries. The user's profile memory is editable. The assistant can suggest memory candidates, but the user can approve, update, or delete them. This distinguishes the prototype from systems that silently infer and store opaque user profiles. The thesis treats user control as a core design requirement rather than an optional feature.
+
+\section{Conversational Agents}
+
+Conversational interfaces have a long history, from early systems such as ELIZA \cite{weizenbaum1966eliza} to modern assistants that combine dialogue, search, and tool invocation. The appeal of conversation is that users can express goals in natural language instead of learning a specific interface grammar. For productivity support, this is especially useful because personal thoughts are often incomplete, emotional, or mixed across categories.
+
+However, conversational interfaces also have weaknesses. They can hide system state, make error recovery unclear, and produce responses that are difficult to verify. A chat message can sound confident even when the underlying reasoning is incomplete. Therefore, a productivity assistant should not rely on conversation alone. The system should convert conversational outputs into visible, editable structures such as items, schedules, memory facts, and graph links.
+
+ClearMind uses chat as the entry point, but it surrounds chat with conventional application screens. The dashboard, database, schedule, graph, and profile pages provide persistent state. This hybrid approach reflects a key design position of the thesis: conversation is valuable for capture and explanation, while structured UI is valuable for review, correction, and long-term use.
+
+\section{Large Language Models}
+
+Large language models are neural models trained on large text corpora to predict and generate language. The transformer architecture introduced attention mechanisms that made it possible to model long-range dependencies efficiently \cite{vaswani2017attention}. Later foundation models demonstrated strong few-shot and instruction-following capabilities \cite{brown2020language,bommasani2021foundation}. For an assistant, these capabilities are useful because the model can interpret ambiguous input, summarize context, and generate structured responses.
+
+The use of LLMs in a productivity assistant must be constrained. Model outputs are probabilistic, can vary between requests, and may include hallucinated details. In ClearMind, the model is not allowed to directly mutate all user data without application-level checks. Instead, the backend asks for structured JSON where possible, validates the result through Pydantic schemas, and maps outputs to typed response objects. Memory candidates are exposed to the user before being accepted as long-term facts.
+
+This design follows the principle that the LLM should be a reasoning component, not the source of truth. The source of truth remains the application database. The assistant can recommend, classify, and summarize, but durable state should pass through explicit routes and services.
+
+\section{Memory and Personalization}
+
+Personalization is the main difference between a generic chatbot and a personal assistant. If the system remembers that the user is a student, has a thesis deadline, prefers morning deep work, or struggles with context switching, it can generate more relevant schedules and reflections. Yet memory also increases risk. Sensitive facts may be stored, inferred incorrectly, or reused in ways the user does not expect.
+
+ClearMind separates memory into explicit and implicit dimensions. Explicit memory consists of facts created or confirmed by the user, such as goals or constraints. Implicit memory consists of candidate facts extracted from interaction history. The prototype treats implicit memory conservatively by presenting candidates for review. Memory entries are categorized as identity, constraint, goal, or general context. This category model is simple, but it is sufficient for a thesis prototype because it supports traceable behavior and understandable UI labels.
+
+The memory design also supports correction. A user can update or delete context entries. This is important because personal facts are not static. Goals change, constraints expire, and preferences evolve. A digital twin assistant that cannot forget or correct information would become less trustworthy over time.
+
+\section{Full-Stack Architecture for AI Applications}
+
+AI assistants are often presented as model-centric systems, but the engineering effort of a usable product is broader. The frontend must handle authentication, page routing, loading states, errors, and responsive layout. The backend must validate requests, enforce user ownership, manage database transactions, call external services safely, and return stable API contracts. The service layer must keep domain logic separated from route functions. The data model must preserve relationships among users, messages, items, links, profile updates, and context entries.
+
+The architecture of ClearMind follows established web application patterns \cite{martin2017clean,fowler2002patterns}. React and TypeScript support a component-based frontend \cite{react,typescript}. FastAPI provides typed Python endpoints and generated OpenAPI documentation \cite{fastapi,openapi}. SQLAlchemy provides an ORM abstraction over SQLite for the thesis prototype \cite{sqlalchemy}. Pydantic validates structured request and response models \cite{pydantic}.
+
+This stack was selected because it balances speed of implementation with clear academic documentation. The API can be inspected, schemas can be cited, tests can be run, and modules can be mapped to requirements. These properties are important for a thesis because the examiner must be able to understand not only what the assistant appears to do, but how the implementation is organized.
+
+\section{Usability and Human Factors}
+
+Usability is central to productivity software. A system that promises to reduce cognitive load but creates confusing workflows fails its own goal. Norman's design principles emphasize visibility, feedback, constraints, and recoverability \cite{norman2013design}. Nielsen's usability work similarly highlights learnability, efficiency, memorability, errors, and satisfaction \cite{nielsen1994usability}. ClearMind applies these ideas through persistent navigation, explicit loading states, empty-state messages, recoverable API errors, and editable outputs.
+
+The thesis does not claim a statistically validated usability study. Instead, it evaluates usability at the prototype level. The manual scenarios verify that users can register, enter the protected workspace, send chat messages, inspect structured outputs, manage memory, export schedules, and review dashboard data. The screenshot pack in Appendix A is designed to make those states visible in the final submitted document.
+
+The System Usability Scale is a common lightweight instrument for evaluating perceived usability \cite{brooke1996sus}. It is included as a recommended future evaluation direction, but the current thesis primarily uses scenario-based validation and qualitative observations due to project time constraints.
+
+\section{Privacy and Ethics}
+
+A personal digital twin assistant handles information that may be sensitive. Tasks, goals, reflections, habits, and constraints can reveal private details about the user. The system therefore needs privacy-conscious design. At minimum, data should be scoped to authenticated users, secrets should not be committed to source control, and the user should be able to inspect and remove stored context.
+
+The General Data Protection Regulation provides a broader legal and ethical reference point for personal data processing in the European context \cite{gdpr}. Although this thesis prototype is not a deployed commercial service, its design should still respect principles such as purpose limitation, data minimization, and user control. The prototype stores only the information required to demonstrate the assistant's workflows. It also separates external LLM calls from internal persistence and mocks external calls in automated tests where possible.
+
+The ethical risk is not only unauthorized access. Another risk is over-personalization: the assistant may reinforce incorrect assumptions about the user. This is why the memory system is visible and editable. The assistant should help the user reason about work, not define the user's identity without oversight.
+
+\section{Related System Patterns}
+
+Several product categories are relevant to ClearMind. Task managers such as Todoist or Microsoft To Do focus on structured obligations. Calendar tools focus on time allocation. Note applications focus on knowledge capture. Chatbots focus on natural-language interaction. Dashboard tools focus on monitoring. ClearMind combines aspects of each category but does not attempt to replace mature products in all dimensions.
+
+The distinctive aspect of the thesis prototype is the combination of memory-aware chat and structured productivity surfaces. A chat input can generate items. Items can become schedule blocks. Profile facts can inform later responses. Graph analysis can expose relationships between tasks and ideas. Dashboard views can summarize activity. This integration is the reason the project is framed as a digital twin assistant rather than a simple CRUD application.
+
+\section{Summary}
+
+The background review shows that ClearMind sits at the intersection of personal information management, conversational agents, large language models, memory-aware personalization, and full-stack web engineering. The literature and technologies suggest both opportunity and risk. LLMs can reduce the effort of converting thoughts into structures, but they require constraints, validation, and user control. Digital twin concepts can motivate persistent user context, but the representation must be limited and editable. Productivity tools can reduce cognitive load, but only if the interface remains understandable.
+
+These observations lead directly into the requirements chapter. The system must support natural input, structured outputs, user-scoped persistence, profile memory, graph and schedule views, reliable UI behavior, and defensible evaluation evidence.

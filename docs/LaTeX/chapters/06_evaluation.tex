@@ -1,0 +1,196 @@
+\chapter{Evaluation and Discussion}
+
+\section{Evaluation Strategy}
+
+The evaluation strategy matches the nature of the project. ClearMind is an applied software engineering prototype with AI-assisted features. Its evaluation therefore combines functional validation, automated testing, coverage evidence, API documentation review, qualitative usability observations, and limitation analysis. The goal is not to prove a universal productivity improvement across a large population. The goal is to show that the implemented system satisfies the thesis requirements and that its quality claims are supported by evidence.
+
+The evaluation is organized around five questions:
+
+\begin{itemize}
+  \item Does the prototype support the core user journeys end to end?
+  \item Does the backend implement stable and testable domain logic?
+  \item Does the system handle external AI dependencies responsibly?
+  \item Is the documentation sufficient for academic review and future maintenance?
+  \item What limitations remain, and how should they be addressed after the thesis?
+\end{itemize}
+
+\section{Functional Evaluation}
+
+The functional evaluation checks whether the implemented modules work together. The validated module set includes authentication, protected routing, chat orchestration, item CRUD, graph retrieval and link lifecycle, profile memory lifecycle, schedule retrieval and export, and dashboard analytics rendering.
+
+\begin{longtable}{|p{0.25\textwidth}|p{0.45\textwidth}|p{0.18\textwidth}|}
+\caption{Functional evaluation summary}
+\label{tab:functional-eval}\\
+\hline
+\textbf{Workflow} & \textbf{Validation evidence} & \textbf{Status}\\
+\hline
+Authentication & User can register or log in and access protected pages with token-based session state. & Pass\\
+\hline
+Protected navigation & Dashboard, chat, database, schedule, and profile routes are guarded and rendered inside the shared layout. & Pass\\
+\hline
+Chat orchestration & User messages are processed through backend routing and return structured assistant output. & Pass\\
+\hline
+Life database & Tasks, ideas, and thoughts can be created, updated, deleted, filtered, and displayed. & Pass\\
+\hline
+Knowledge graph & Item nodes and relationships can be retrieved; invalid links are rejected. & Pass\\
+\hline
+Profile memory & Context entries can be created, updated, deleted, and reviewed with history events. & Pass\\
+\hline
+Schedule & Schedule blocks can be displayed and exported to calendar format. & Pass\\
+\hline
+Dashboard & Analytics data is aggregated and rendered in frontend summary sections. & Pass\\
+\hline
+\end{longtable}
+
+The result of this evaluation is that the prototype satisfies the core user journeys defined in Chapter 3. The most important evidence is not that each page exists, but that the pages are connected through backend data and typed API contracts.
+
+\section{Scenario-Based Manual Validation}
+
+Manual validation was used to check the user experience across realistic flows. These scenarios are written in non-programmer-friendly terms so that a supervisor or examiner can reproduce them during review.
+
+\begin{enumerate}
+  \item Register a user, log in, and confirm that protected pages are accessible.
+  \item Submit a chat message containing several unstructured obligations and ideas.
+  \item Review the assistant response and confirm that structured items or memory candidates are displayed.
+  \item Open the life database and verify that item workflows are visible and editable.
+  \item Open the profile memory page and create, edit, and delete a context fact.
+  \item Open the schedule page and review schedule blocks or the empty-state guidance.
+  \item Open the dashboard and confirm that telemetry sections render without breaking layout.
+  \item Open the API documentation artifact and confirm that endpoints are documented.
+\end{enumerate}
+
+\screenshotfigure{images/screenshots/manual_walkthrough.png}{Capture a composite or representative screen from the recorded demo walkthrough.}{Manual walkthrough evidence for the final thesis demonstration.}{fig:screenshot-walkthrough}
+
+The manual validation is particularly important for UI states. Automated backend tests cannot fully prove whether a loading state, empty state, or error message is understandable to a user. Screenshots and recorded walkthroughs provide the visual evidence needed for the thesis defense.
+
+\section{Automated Testing}
+
+Automated testing focuses on backend behavior because it is where most persistent and AI-adjacent logic resides. The test suite covers structured JSON parsing, profile memory persistence, dashboard analytics aggregation, route behavior, and orchestrator paths. External LLM behavior is mocked in tests where needed. This avoids unstable live dependencies in CI.
+
+\begin{table}[H]
+\centering
+\caption{Backend test coverage areas}
+\label{tab:test-areas}
+\begin{tabular}{|p{0.30\textwidth}|p{0.52\textwidth}|}
+\hline
+\textbf{Area} & \textbf{Purpose}\\
+\hline
+Structured LLM JSON parsing & Verify that AI-adjacent response handling remains predictable and validated.\\
+\hline
+Profile memory service & Verify creation, update, deletion, extraction, and persistence behavior for long-term context.\\
+\hline
+Dashboard analytics & Verify aggregation logic used by dashboard telemetry.\\
+\hline
+Routes and orchestrator & Verify endpoint behavior and routing paths with controlled dependencies.\\
+\hline
+\end{tabular}
+\end{table}
+
+The reported coverage is 86.94\%, above the required 80\% threshold. The enforced command is:
+
+\begin{lstlisting}[caption={Coverage command used for evaluation},label={lst:coverage-command}]
+pytest --cov=app --cov-fail-under=80
+\end{lstlisting}
+
+The coverage result does not mean every possible UI branch or live model response is tested. It means that the core backend logic and critical quality paths satisfy the planned threshold. This is appropriate for a thesis prototype and provides a defensible baseline for future work.
+
+\section{CI and Code Quality Evaluation}
+
+The CI pipeline is configured through GitHub Actions. It runs on pushes to the main branch and includes dependency installation, static analysis, and test execution with coverage enforcement. Static analysis uses Ruff, which supports consistent Python style and catches common issues. The coverage gate ensures that the test suite remains meaningful rather than optional.
+
+\begin{table}[H]
+\centering
+\caption{CI quality gates}
+\label{tab:ci-gates}
+\begin{tabular}{|p{0.28\textwidth}|p{0.50\textwidth}|p{0.12\textwidth}|}
+\hline
+\textbf{Gate} & \textbf{Command or evidence} & \textbf{Status}\\
+\hline
+Static analysis & \texttt{ruff check .} & Pass\\
+\hline
+Automated tests & \texttt{pytest} & Pass\\
+\hline
+Coverage threshold & \texttt{pytest --cov=app --cov-fail-under=80} & Pass\\
+\hline
+Reported coverage & 86.94\% & Pass\\
+\hline
+\end{tabular}
+\end{table}
+
+CI is also an academic traceability tool. It helps demonstrate that quality claims are repeatable. A screenshot of a successful run should be included in the final thesis evidence pack, as listed in Appendix A.
+
+\section{API Documentation Evaluation}
+
+The API documentation export is part of the final documentation evidence. The backend can generate OpenAPI schema data, and the export script writes a standalone ReDoc HTML page. This supports maintainability because future developers and examiners can inspect endpoints, schemas, and response structures.
+
+\begin{table}[H]
+\centering
+\caption{API documentation artifacts}
+\label{tab:api-docs}
+\begin{tabular}{|p{0.32\textwidth}|p{0.48\textwidth}|}
+\hline
+\textbf{Artifact} & \textbf{Purpose}\\
+\hline
+\texttt{docs/api/openapi.json} & Machine-readable OpenAPI schema generated from FastAPI routes.\\
+\hline
+\texttt{docs/api/index.html} & Standalone ReDoc page for human-readable endpoint review.\\
+\hline
+\texttt{src/backend/scripts/export\_api\_docs.py} & Script used to export documentation artifacts.\\
+\hline
+\end{tabular}
+\end{table}
+
+This documentation matters because the assistant is not only a frontend demonstration. The API contract is part of the final product. Generated API documentation also reduces manual drift between implementation and documentation.
+
+\section{Usability Discussion}
+
+The prototype supports several usability principles. The public landing page introduces the system before authentication. The protected workspace uses consistent navigation. Chat provides immediate feedback for user input. Database and profile pages expose structured state. Empty states and error states prevent the interface from feeling broken when data is missing or a request fails.
+
+The most important usability decision is the separation between chat generation and artifact review. If the assistant only produced a paragraph of text, the user would have to manually copy information into a task list or calendar. ClearMind instead aims to present structured outputs in places where the user can review and act on them. This reduces friction and supports the thesis objective of lowering cognitive overhead.
+
+At the same time, usability limitations remain. The current evaluation does not include a statistically significant user study. UI visual regression tests are not configured. Some edge-case flows require further polish before production use. The thesis therefore treats usability evidence as prototype-level validation, not a final human-computer interaction study.
+
+\section{AI Reliability Discussion}
+
+External LLM calls are valuable but risky. The model may return malformed JSON, incomplete suggestions, or content that does not match user intent. Network calls may fail or become slow. Provider behavior may change. The implementation mitigates these risks by using structured output helpers, schemas, fallbacks, and mocked tests.
+
+The most important reliability decision is that the database remains the source of truth. The LLM can suggest items, memory candidates, or schedule blocks, but durable state is controlled by backend routes and user actions. This reduces the risk that an unpredictable model response silently corrupts user data.
+
+For future work, the system should add stronger retry and timeout policies, richer logging, model response auditing, and possibly a local fallback mode for selected non-LLM workflows. It should also record evaluation metrics such as response latency, malformed response rate, and memory candidate acceptance rate.
+
+\section{Privacy and Ethical Evaluation}
+
+ClearMind handles personal context, so privacy is a core evaluation concern. The current implementation uses authenticated endpoints, user-scoped database access, and environment-based secret management. The profile memory page exposes stored context entries so that the user can review and modify them. These choices align with privacy-by-design principles and with the general direction of GDPR expectations \cite{gdpr}.
+
+The ethical risk that remains is inference quality. Even if data is protected, the assistant may infer a fact that the user does not agree with. The candidate memory workflow mitigates this by requiring review before durable storage. In future work, the system should make memory provenance even clearer, showing when and why a fact was created and which interaction produced it.
+
+\section{Performance Discussion}
+
+The prototype is designed for local and thesis-scale operation. Non-LLM endpoints should respond quickly under normal local use. LLM-dependent endpoints naturally have higher latency because they depend on external model calls. The system should therefore provide loading indicators and avoid blocking unrelated navigation.
+
+The current evaluation does not include detailed benchmark tables for latency, throughput, or cost. These metrics are recommended for future productionization. For the thesis scope, the performance claim is limited: the prototype is usable in interactive local workflows and can be demonstrated end to end.
+
+\section{Documentation Completeness}
+
+The final documentation package includes feasibility analysis, system specifications, user stories, backend overview, interface guide, final user manual, methodology and results drafts, diagram sources, API documentation, evaluation summary, and test coverage report. The LaTeX thesis integrates these artifacts into a single academic narrative.
+
+The documentation is important because it makes the project reviewable. A thesis examiner should be able to follow the connection from problem statement to requirements, from requirements to architecture, from architecture to implementation, and from implementation to evaluation evidence.
+
+\section{Limitations}
+
+Several limitations remain.
+
+\begin{itemize}
+  \item The prototype uses SQLite, which is suitable for thesis demonstration but should be replaced by PostgreSQL for multi-user production.
+  \item External LLM behavior is not fully controllable and requires stronger production-grade monitoring, retries, and cost tracking.
+  \item The usability evaluation is scenario-based and qualitative rather than statistically significant.
+  \item Visual regression testing is not configured for the frontend.
+  \item The final screenshots and diagram PNG exports must be added before final PDF submission.
+  \item Some dependency deprecation warnings may remain and should be tracked as maintenance tasks.
+\end{itemize}
+
+These limitations do not invalidate the thesis result. They define the boundary between a complete academic prototype and a production system.
+
+\section{Evaluation Summary}
+
+The evaluation shows that ClearMind satisfies the main thesis requirements. The system supports the planned end-to-end workflows, exposes typed API contracts, persists user-scoped data, manages profile memory, includes graph and schedule features, and provides automated backend quality evidence. The reported backend coverage of 86.94\% passes the planned threshold. The remaining work before final submission is mostly visual evidence collection, diagram export, and final language polish.

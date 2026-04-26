@@ -62,6 +62,8 @@ changes.md
 /test_*.py
 sampledoc/
 0_backend-quality.txt
+contex
+SCREENSHOT_INSTRUCTIONS.md
 
 # Generated tooling/artifacts
 tools/

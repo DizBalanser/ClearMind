@@ -1,0 +1,113 @@
+\chapter{Traceability Matrix}
+
+\section{Requirement to Implementation Mapping}
+
+This appendix summarizes how the main requirements map to implementation artifacts. The paths are written as repository locations so that the examiner or maintainer can inspect the corresponding source files.
+
+\begin{longtable}{|p{0.16\textwidth}|p{0.38\textwidth}|p{0.34\textwidth}|}
+\caption{Functional requirement traceability}
+\label{tab:req-traceability}\\
+\hline
+\textbf{ID} & \textbf{Requirement summary} & \textbf{Implementation mapping}\\
+\hline
+FR-BO-01 & Unified conversational intake & \texttt{src/backend/app/routes/chat.py}\\
+\hline
+FR-BO-02 & Intent-based delegation & \texttt{src/backend/app/services/orchestrator.py}\\
+\hline
+FR-BO-03 & Structured response payload & \texttt{src/backend/app/schemas.py}\\
+\hline
+FR-BO-04 & Conversation persistence & \texttt{src/backend/app/models/message.py}, chat route persistence logic\\
+\hline
+FR-BO-05 & Memory candidate extraction & \texttt{src/backend/app/services/profile\_memory.py}\\
+\hline
+FR-KG-01 & Graph retrieval & \texttt{src/backend/app/routes/graph.py}\\
+\hline
+FR-KG-02 & Manual link management & \texttt{src/backend/app/routes/graph.py}\\
+\hline
+FR-KG-03 & AI-assisted graph analysis & \texttt{src/backend/app/services/agents/graph\_analyzer.py}\\
+\hline
+FR-KG-04 & Link integrity controls & Validation checks in graph route logic\\
+\hline
+FR-PM-01 & Active context retrieval & \texttt{src/backend/app/routes/profile.py}\\
+\hline
+FR-PM-02 & User-approved memory creation & \texttt{src/backend/app/routes/profile.py}\\
+\hline
+FR-PM-03 & Questionnaire enrichment & Profile questionnaire routes and memory service\\
+\hline
+FR-PM-04 & Context correction lifecycle & Profile update and delete routes\\
+\hline
+FR-PM-05 & Input validation & Pydantic schemas and explicit route errors\\
+\hline
+\end{longtable}
+
+\section{User Story to Screen Mapping}
+
+\begin{longtable}{|p{0.14\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
+\caption{User story to interface mapping}
+\label{tab:story-screen-map}\\
+\hline
+\textbf{Story} & \textbf{Primary screen} & \textbf{Supporting backend}\\
+\hline
+US-01 & Landing page, authentication modal, protected layout & \texttt{auth.py}, \texttt{users.py}\\
+\hline
+US-02 & Chat page & \texttt{chat.py}, orchestrator, brain-dump agent\\
+\hline
+US-03 & Chat page history area & Message and conversation models\\
+\hline
+US-04 & My Life Database page & \texttt{items.py}, item model\\
+\hline
+US-05 & Database graph view & \texttt{graph.py}, item link model, graph analyzer\\
+\hline
+US-06 & User Profile page & \texttt{profile.py}, user context and profile update models\\
+\hline
+US-07 & Schedule page & \texttt{schedule.py}, scheduler agent\\
+\hline
+US-08 & Dashboard page & \texttt{dashboard.py}, analytics aggregation\\
+\hline
+US-09 & Recorded demo flow and screenshot pack & Final user manual and evidence artifacts\\
+\hline
+\end{longtable}
+
+\section{Milestone Evidence Mapping}
+
+\begin{longtable}{|p{0.18\textwidth}|p{0.34\textwidth}|p{0.34\textwidth}|}
+\caption{Milestone evidence mapping}
+\label{tab:milestone-map}\\
+\hline
+\textbf{Milestone} & \textbf{Evidence} & \textbf{Thesis location}\\
+\hline
+Milestone 1 & Feasibility plan, system architecture diagram, milestone plan & Chapters 1, 3, and 4\\
+\hline
+Milestone 2 & Backend overview, route and service modules, initial tests & Chapters 4 and 5\\
+\hline
+Milestone 3 & Interface guide, methodology draft, results draft, integrated UI & Chapters 5 and 6\\
+\hline
+Milestone 4 & Final manual, coverage report, API docs, evaluation summary & Chapters 6 and 7, appendices\\
+\hline
+\end{longtable}
+
+\section{Quality Evidence Mapping}
+
+\begin{longtable}{|p{0.28\textwidth}|p{0.34\textwidth}|p{0.24\textwidth}|}
+\caption{Quality evidence mapping}
+\label{tab:quality-evidence}\\
+\hline
+\textbf{Quality claim} & \textbf{Evidence artifact} & \textbf{Status}\\
+\hline
+Automated backend testing exists & \texttt{src/backend/tests/} & Complete\\
+\hline
+Coverage threshold is satisfied & \texttt{results/test\_coverage\_report.md} & 86.94 percent\\
+\hline
+CI gate is configured & \texttt{.github/workflows/ci.yml} & Complete\\
+\hline
+API documentation is exportable & \texttt{docs/api/index.html}, \texttt{docs/api/openapi.json} & Complete\\
+\hline
+Functional documentation exists & \texttt{docs/system\_specifications.md}, \texttt{docs/user\_stories.md} & Complete\\
+\hline
+User documentation exists & \texttt{docs/user\_manual/final\_manual.md} & Complete\\
+\hline
+Diagram package exists & \texttt{docs/diagrams/} PlantUML files & Source complete, PNG export pending\\
+\hline
+Visual thesis evidence exists & Screenshots listed in Appendix A & Pending capture\\
+\hline
+\end{longtable}

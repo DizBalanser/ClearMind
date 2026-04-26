@@ -1,0 +1,217 @@
+\chapter{Requirements and Analysis}
+
+\section{Requirement Engineering Approach}
+
+The requirements were derived from the thesis topic, milestone plan, feasibility analysis, user stories, and implemented prototype scope. The goal of the analysis phase was to avoid treating the assistant as a vague chatbot. Instead, the project defines concrete behaviors that can be implemented, tested, and demonstrated.
+
+The analysis uses three complementary views. Functional requirements describe what the system must do. Non-functional requirements describe quality expectations such as reliability, security, maintainability, and usability. User stories describe the expected user value and acceptance criteria. Together, these views support traceability from thesis goals to implementation modules.
+
+The requirements were refined iteratively. Early milestones focused on research, architecture, and backend feasibility. Later milestones added UI integration, graph analysis, profile memory, evaluation evidence, and final documentation. This mirrors the applied prototype methodology used throughout the project: define a narrow but complete workflow, implement it, document it, and then harden the next layer.
+
+\section{Stakeholders}
+
+The main stakeholder is the end user who wants help with productivity and self-management. The user expects the system to capture unstructured thoughts, organize them, preserve personal context, and support planning. The second stakeholder is the thesis evaluator, who needs evidence that the system is not only visually appealing but also technically coherent and validated. A third stakeholder is the developer-maintainer, who needs a modular codebase that can be extended after the thesis.
+
+\begin{table}[H]
+\centering
+\caption{Stakeholder needs}
+\label{tab:stakeholder-needs}
+\begin{tabular}{|p{0.25\textwidth}|p{0.60\textwidth}|}
+\hline
+\textbf{Stakeholder} & \textbf{Need}\\
+\hline
+End user & Capture thoughts quickly, convert them into structured tasks or reflections, review memory, and preserve control over personal data.\\
+\hline
+Thesis evaluator & Inspect requirements, design decisions, implementation evidence, testing evidence, and limitations.\\
+\hline
+Developer-maintainer & Understand routes, services, models, schemas, and frontend screens without reverse-engineering the entire repository.\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Functional Requirements}
+
+The functional requirements are grouped by the major modules implemented in the prototype. They correspond to the system specification artifact and to the final application workflows.
+
+\subsection{Brain-Dump Orchestrator}
+
+The brain-dump orchestrator is the central conversational intake module. It accepts authenticated user messages and routes them through the backend service layer. The user should be able to submit a natural-language message without choosing a rigid form. The system should classify intent, delegate the work to the appropriate specialized agent, and return a normalized response.
+
+\begin{longtable}{|p{0.18\textwidth}|p{0.70\textwidth}|}
+\caption{Brain-dump orchestrator requirements}
+\label{tab:brain-dump-req}\\
+\hline
+\textbf{ID} & \textbf{Requirement}\\
+\hline
+FR-BO-01 & The system shall accept authenticated user messages through a unified conversational endpoint.\\
+\hline
+FR-BO-02 & The system shall classify interaction intent and delegate processing to a specialized agent such as brain dump, scheduler, reflection, or planner.\\
+\hline
+FR-BO-03 & The system shall return a normalized response containing message text and optional structured sections.\\
+\hline
+FR-BO-04 & The system shall persist user and assistant messages for later history retrieval.\\
+\hline
+FR-BO-05 & The system shall extract candidate long-term facts and expose them for user approval.\\
+\hline
+\end{longtable}
+
+\subsection{Knowledge Graph Module}
+
+The knowledge graph module supports relationships between personal database items. Its purpose is to help the user see dependencies, associations, and semantic connections among tasks, ideas, and thoughts. The module supports retrieval, manual link management, AI-assisted graph analysis, and integrity controls.
+
+\begin{longtable}{|p{0.18\textwidth}|p{0.70\textwidth}|}
+\caption{Knowledge graph requirements}
+\label{tab:graph-req}\\
+\hline
+\textbf{ID} & \textbf{Requirement}\\
+\hline
+FR-KG-01 & The system shall return item nodes and edge links for the authenticated user's graph.\\
+\hline
+FR-KG-02 & The system shall allow users to create and delete links between valid owned items.\\
+\hline
+FR-KG-03 & The system shall analyze existing items and suggest or create high-confidence semantic links.\\
+\hline
+FR-KG-04 & The system shall reject invalid links, including self-links, duplicates, and unauthorized cross-user links.\\
+\hline
+\end{longtable}
+
+\subsection{Global Profile Memory}
+
+The profile memory module stores durable context facts about the user. These facts can be created explicitly, generated from guided questions, or suggested by the assistant as memory candidates. The memory model supports correction because personal context changes over time.
+
+\begin{longtable}{|p{0.18\textwidth}|p{0.70\textwidth}|}
+\caption{Profile memory requirements}
+\label{tab:memory-req}\\
+\hline
+\textbf{ID} & \textbf{Requirement}\\
+\hline
+FR-PM-01 & The system shall return a normalized view of active long-term context entries and recent profile update events.\\
+\hline
+FR-PM-02 & The system shall allow explicit user-approved memory creation by category.\\
+\hline
+FR-PM-03 & The system shall accept guided questionnaire answers and transform valid answers into context entries.\\
+\hline
+FR-PM-04 & The system shall support updating and deleting existing context entries.\\
+\hline
+FR-PM-05 & The system shall reject empty facts and unknown context references with explicit API errors.\\
+\hline
+\end{longtable}
+
+\section{Non-Functional Requirements}
+
+The non-functional requirements define the quality boundaries of the prototype. Because the system handles personal data and external AI calls, quality cannot be reduced to visual completeness.
+
+\begin{longtable}{|p{0.20\textwidth}|p{0.68\textwidth}|}
+\caption{Non-functional requirements}
+\label{tab:nfr}\\
+\hline
+\textbf{Category} & \textbf{Requirement summary}\\
+\hline
+Performance & Non-LLM endpoints should return within interactive latency targets under normal local load. Frontend interactions should not block unrelated navigation. CI checks should complete predictably.\\
+\hline
+Reliability & External AI failures should not crash the system. Data writes should be transactionally safe and user-scoped. Core backend logic should be regression-tested.\\
+\hline
+Security & Protected endpoints shall require token-based authentication. Data access shall be constrained to authenticated ownership. Secrets shall remain outside committed source code.\\
+\hline
+Usability & The UI shall provide clear loading, success, empty, and failure states. Navigation shall remain consistent through protected pages.\\
+\hline
+Maintainability & Backend concerns shall remain modularized by route, service, and model boundaries. API contracts shall remain typed and documented. Static checks should run through CI.\\
+\hline
+\end{longtable}
+
+\section{Use Cases}
+
+The main actor is the end user. The LLM provider is modeled as an external actor because some workflows depend on external model calls. The use case diagram is stored as PlantUML source in the repository and should be exported to PNG for final submission. The LaTeX source below is prepared to include the PNG automatically when it is available.
+
+\pendingfigure{../diagrams/use_case/diagram.png}{Export \texttt{docs/diagrams/use\_case/diagram.puml} to PNG.}{Use case diagram for the ClearMind system.}{fig:use-case}
+
+The primary use cases are register/login, complete onboarding, send chat message, generate action items, save profile memory, view dashboard analytics, manage life database items, analyze the knowledge graph, generate a schedule, and update user profile context. The diagram also shows that the chat, graph, schedule, and memory workflows may call the external LLM provider.
+
+\section{User Stories}
+
+The user stories are written in the format ``As a role, I want a goal, so that I receive a benefit.'' Each story includes acceptance criteria and edge cases. This is important because thesis evaluation often reveals whether the system handles failure paths or only happy paths.
+
+\begin{longtable}{|p{0.12\textwidth}|p{0.35\textwidth}|p{0.38\textwidth}|}
+\caption{User story summary}
+\label{tab:user-stories}\\
+\hline
+\textbf{ID} & \textbf{Goal} & \textbf{Key acceptance and edge cases}\\
+\hline
+US-01 & Authenticate and access protected workspace. & Valid credentials create access; invalid credentials do not create a session; missing token redirects away from protected content.\\
+\hline
+US-02 & Capture thoughts through chat. & Non-empty text is processed; structured response is displayed; empty input is rejected; backend or model failure shows fallback message.\\
+\hline
+US-03 & Persist conversation history. & Recent messages load chronologically; new exchanges are stored; retrieval failure preserves a usable empty state.\\
+\hline
+US-04 & Manage life database items. & Items can be created, edited, deleted, filtered, and preserved after refresh; mutation failure is recoverable.\\
+\hline
+US-05 & Build and analyze knowledge graph. & Valid links are visible; duplicate and self-links are rejected; insufficient data returns a valid empty result.\\
+\hline
+US-06 & Maintain global profile memory. & Context entries are visible, editable, and deletable; questionnaire answers create reviewed entries; LLM extraction failure does not break chat.\\
+\hline
+US-07 & Generate and export schedule. & Schedule blocks are grouped by date and time; export produces an \texttt{.ics} file; empty schedules show guidance.\\
+\hline
+US-08 & Consume dashboard insights. & Telemetry cards and charts render; partial analytics data is handled with defaults.\\
+\hline
+US-09 & Provide reliable thesis presentation behavior. & The recorded demo uses stable seeded data and avoids dependence on uncontrolled live behavior during defense.\\
+\hline
+\end{longtable}
+
+\section{User Interface Plan}
+
+The interface plan separates the public entry point from the protected workspace. After login, the user sees a persistent application shell with navigation to dashboard, chat, database, schedule, and profile pages. This structure is important because the assistant's outputs are not confined to a single chat screen. Chat may create items, items appear in the database, schedules appear in the schedule page, and memory facts appear in the profile page.
+
+\pendingfigure{../diagrams/ui_plan/diagram.png}{Export \texttt{docs/diagrams/ui\_plan/diagram.puml} to PNG.}{Planned user interface structure and navigation.}{fig:ui-plan}
+
+The UI plan also supports the screenshot strategy of the thesis. Every major page should have a final screenshot in the submitted version. The screenshot list in Appendix A describes the exact captures required.
+
+\section{Feasibility Analysis}
+
+The feasibility analysis confirms that the selected stack is suitable for the thesis scope. React, TypeScript, and Tailwind support rapid UI development and strongly typed data consumption. FastAPI supports modular routes and OpenAPI documentation. SQLAlchemy and SQLite provide adequate persistence for a local prototype. Gemini-based LLM integration is feasible when routed through a service layer and validated through structured schemas.
+
+\begin{table}[H]
+\centering
+\caption{Feasibility summary}
+\label{tab:feasibility}
+\begin{tabular}{|p{0.26\textwidth}|p{0.58\textwidth}|}
+\hline
+\textbf{Area} & \textbf{Conclusion}\\
+\hline
+Frontend & React, TypeScript, and Tailwind are feasible for a multi-page interactive assistant.\\
+\hline
+Backend & FastAPI is feasible for typed API endpoints, modular routing, and generated documentation.\\
+\hline
+Persistence & SQLite and SQLAlchemy are adequate for thesis-scale local use and can later be migrated.\\
+\hline
+AI integration & External LLM use is feasible if structured, validated, mocked in tests, and handled with fallbacks.\\
+\hline
+Schedule & The project milestones show that finalization is mostly documentation, testing, and polish rather than foundational redesign.\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Risk Analysis}
+
+The most important risks are LLM hallucination, API rate limits, database limitations, CI instability, traceability gaps, and presentation risk. These risks are not equal. Hallucination and privacy risk are high impact because they can affect trust. SQLite contention is lower in the thesis context because the prototype is local and low concurrency. Presentation risk is mitigated through a recorded walkthrough and screenshot evidence.
+
+\begin{longtable}{|p{0.28\textwidth}|p{0.15\textwidth}|p{0.45\textwidth}|}
+\caption{Requirement-level risk matrix}
+\label{tab:risk}\\
+\hline
+\textbf{Risk} & \textbf{Impact} & \textbf{Mitigation}\\
+\hline
+Incorrect LLM suggestions or links & High & Use structured response schemas, validate outputs, and require user confirmation for durable memory writes.\\
+\hline
+External model latency or rate limits & High & Separate deterministic tests from live checks, mock external calls in CI, and provide fallback UI behavior.\\
+\hline
+SQLite lock or scale limitations & Medium & Keep transactions short and document PostgreSQL migration as future work.\\
+\hline
+Incomplete traceability & Medium & Maintain requirement-to-implementation mapping and cite concrete route, service, model, and test artifacts.\\
+\hline
+Defense/demo instability & Medium & Use recorded walkthrough evidence and capture stable screenshots of final workflows.\\
+\hline
+\end{longtable}
+
+\section{Analysis Summary}
+
+The analysis phase establishes the boundaries of the thesis. ClearMind must be more than a chat interface, but it does not need to become a commercial productivity platform. The central requirements are natural-language capture, structured outputs, persistent user-scoped data, editable memory, schedule and graph views, usable UI states, and measurable quality evidence. These requirements shape the architecture presented in the next chapter.

@@ -1,0 +1,186 @@
+\chapter{System Design}
+
+\section{Design Overview}
+
+The system design follows a layered full-stack architecture. The frontend is responsible for interaction, navigation, visual feedback, and typed API consumption. The backend is responsible for authentication, request validation, routing, domain services, persistence, and external LLM calls. The data layer stores durable state such as users, items, messages, graph links, profile updates, and user context. The AI layer is not a separate application; it is integrated as a service layer behind API boundaries.
+
+This design was chosen because it provides a clear separation between user experience, application logic, AI reasoning, and persistence. A personal digital twin assistant can easily become difficult to understand if all behavior is hidden inside prompts. ClearMind avoids that by giving each domain a visible software module and by routing all durable state changes through backend code.
+
+\section{Architectural Principles}
+
+Four principles guide the architecture.
+
+\textbf{Modularity.} The assistant is decomposed into frontend pages, backend routes, service modules, agent modules, and database models. This keeps each responsibility small enough to reason about. For example, graph analysis is separated from profile memory, and profile memory is separated from authentication.
+
+\textbf{Typed boundaries.} The backend uses schema models for request and response validation. The frontend consumes typed API structures. This reduces the risk of passing unstructured model output directly to UI components or database writes.
+
+\textbf{User control.} Memory is not treated as invisible model state. Long-term context entries can be reviewed, updated, and deleted from the profile page. Candidate facts are exposed rather than silently becoming permanent truth.
+
+\textbf{Defensible evaluation.} The architecture supports testing and documentation. Backend logic can be tested with pytest, external model behavior can be mocked, OpenAPI documentation can be exported, and the thesis can map requirements to modules.
+
+\section{Layered Architecture}
+
+Figure \ref{fig:system-architecture} shows the intended architecture. The presentation layer consists of the React and Vite frontend. The API layer is the FastAPI application and its route modules. The domain and AI layer contains the orchestrator, specialized agents, profile memory service, and shared structured JSON adapter. The data layer contains SQLAlchemy models and the SQLite database. The external LLM provider is outside the system boundary.
+
+\pendingfigure{../diagrams/system_architecture/diagram.png}{Export \texttt{docs/diagrams/system\_architecture/diagram.puml} to PNG.}{Layered system architecture of ClearMind.}{fig:system-architecture}
+
+The important design decision is that external model calls occur through controlled backend services. The frontend does not call the LLM provider directly. This keeps API keys out of the browser, allows backend validation, and centralizes fallback behavior.
+
+\section{Package Structure}
+
+The repository is organized around the two main runtime applications and supporting documentation. The backend lives under \texttt{src/backend}; the frontend lives under \texttt{src/frontend}; project documentation lives under \texttt{docs}; evaluation evidence lives under \texttt{results}; and the final LaTeX thesis source lives under \texttt{docs/LaTeX}.
+
+\pendingfigure{../diagrams/package_structure/diagram.png}{Export \texttt{docs/diagrams/package\_structure/diagram.puml} to PNG.}{Package-level structure of the repository.}{fig:package-structure}
+
+The backend package contains route modules, models, services, utility modules, tests, and scripts. The frontend package contains pages, components, service functions, types, and build configuration. This separation allows frontend and backend work to evolve independently while still being integrated through API contracts.
+
+\section{Backend Domain Model}
+
+The domain model centers on the authenticated user. A user owns items, messages, conversations, reflections, profile updates, and user context entries. Items can be connected through item links, forming the basis of the knowledge graph. Profile updates record memory extraction events, while user context entries represent the active long-term memory used for personalization.
+
+\pendingfigure{../diagrams/class_design/diagram.png}{Export \texttt{docs/diagrams/class\_design/diagram.puml} to PNG.}{Class-level view of core backend domain objects and services.}{fig:class-design}
+
+The class design also shows service relationships. The orchestrator composes specialized agents such as BrainDumpAgent, ReflectionAgent, SchedulerAgent, and PlannerAgent. GraphAnalyzerAgent operates on items and item links. ProfileMemoryService operates on profile updates and user context. This division matches the functional requirements and supports targeted testing.
+
+\section{Data Model}
+
+The database design is intentionally compact. The thesis prototype does not need a large enterprise schema, but it does need enough structure to support authenticated ownership, task management, graph relationships, chat persistence, reflections, and profile memory.
+
+\pendingfigure{../diagrams/database_design/diagram.png}{Export \texttt{docs/diagrams/database\_design/diagram.puml} to PNG.}{Database design for core entities.}{fig:database-design}
+
+\begin{table}[H]
+\centering
+\caption{Core database entities}
+\label{tab:db-entities}
+\begin{tabular}{|p{0.22\textwidth}|p{0.62\textwidth}|}
+\hline
+\textbf{Entity} & \textbf{Responsibility}\\
+\hline
+\texttt{user} & Stores identity, email, hashed password, profile attributes, and ownership root.\\
+\hline
+\texttt{item} & Stores tasks, ideas, and thoughts with categories, priorities, deadlines, and status.\\
+\hline
+\texttt{item\_link} & Stores relationships between items for graph exploration and analysis.\\
+\hline
+\texttt{message} & Stores individual user and assistant messages for chat history.\\
+\hline
+\texttt{conversation} & Stores grouped conversation records used by reflection and context workflows.\\
+\hline
+\texttt{reflection} & Stores summaries, patterns, and suggestions generated from historical context.\\
+\hline
+\texttt{profile\_update} & Stores append-only events describing extracted or created memory facts.\\
+\hline
+\texttt{user\_context} & Stores active long-term memory facts used for personalization.\\
+\hline
+\end{tabular}
+\end{table}
+
+The model is user-scoped. This means that route functions and services query records through the authenticated user and should not expose data across accounts. This is a security requirement and also a conceptual requirement: a personal digital twin must belong to a specific user.
+
+\section{Interaction Design}
+
+The central interaction flow starts when the user submits a message in chat. The frontend sends the message to the backend. The backend authenticates the request, loads relevant user context, retrieves recent chat or item state, and invokes the orchestrator. The orchestrator classifies the user input and delegates to an agent. The result is normalized and returned to the frontend, where it may include message text, extracted items, schedule blocks, reflection summaries, memory candidates, or graph links.
+
+\pendingfigure{../diagrams/interaction/diagram.png}{Export \texttt{docs/diagrams/interaction/diagram.puml} to PNG.}{Interaction flow from user input to structured assistant response.}{fig:interaction-design}
+
+This interaction pattern supports multiple user experiences without multiplying endpoints unnecessarily. A natural-language message can become a task-capture event, a scheduling request, a reflection prompt, or a planning question. The backend remains responsible for deciding how to route the request.
+
+\section{State Machine Design}
+
+The assistant has several stateful workflows. Authentication moves the user from public access to protected workspace access. Chat moves from idle to sending, processing, response, and error states. Memory curation moves from candidate generation to user review, acceptance, correction, or rejection. Schedule and dashboard pages move through loading, populated, empty, and failure states.
+
+\pendingfigure{../diagrams/state_machine/diagram.png}{Export \texttt{docs/diagrams/state\_machine/diagram.puml} to PNG.}{State machine for major user and assistant states.}{fig:state-machine}
+
+Making these states explicit improves reliability. For example, empty schedules are not treated as errors. They are rendered as valid states with guidance. Similarly, a model timeout should not crash the chat page; it should produce a recoverable fallback. This distinction between failure and empty state is especially important in productivity applications, because users may start with little or no data.
+
+\section{User Interface Design}
+
+The UI design combines a public landing page with a protected application shell. The shell provides persistent navigation through a sidebar and top navigation bar. Protected pages include dashboard, chat, database, schedule, and profile memory. The user should be able to move between generated artifacts and their persistent representations.
+
+\pendingfigure{../diagrams/user_interface_design/diagram.png}{Export \texttt{docs/diagrams/user\_interface\_design/diagram.puml} to PNG.}{User interface design for protected workspace pages.}{fig:ui-design}
+
+The most important UI design rule is that AI outputs must become reviewable objects. The chat response may be conversational, but tasks should be visible as items, memory facts should be visible in the profile page, and schedules should be visible as time blocks. This prevents the assistant from becoming a transient text generator whose output disappears in conversation history.
+
+\section{AI Service Design}
+
+The AI layer is organized around an orchestrator and specialized agents. The orchestrator acts as a router. It receives user input and decides whether the request is best handled as brain dump, reflection, scheduling, or planning. Specialized agents then use prompts and structured output expectations for their domain. A shared JSON helper reduces the risk of ad hoc parsing.
+
+\begin{table}[H]
+\centering
+\caption{Specialized AI responsibilities}
+\label{tab:agent-responsibilities}
+\begin{tabular}{|p{0.25\textwidth}|p{0.58\textwidth}|}
+\hline
+\textbf{Component} & \textbf{Responsibility}\\
+\hline
+Orchestrator & Classifies user intent and delegates to a specialized agent.\\
+\hline
+Brain dump agent & Converts unstructured thoughts into tasks, ideas, thoughts, and memory candidate signals.\\
+\hline
+Scheduler agent & Builds schedule blocks from pending tasks and user planning requests.\\
+\hline
+Reflection agent & Summarizes historical behavior and generates patterns or suggestions.\\
+\hline
+Planner agent & Supports higher-level planning and long-term goal reasoning.\\
+\hline
+Graph analyzer & Suggests semantic relationships between stored items.\\
+\hline
+Profile memory service & Extracts, stores, updates, and deletes long-term context facts.\\
+\hline
+\end{tabular}
+\end{table}
+
+This design makes the system easier to explain and test. Instead of one prompt handling all tasks, each agent can be evaluated according to its expected output. If scheduling behavior changes, the scheduler agent can be modified without rewriting the profile memory service.
+
+\section{API Design}
+
+The API is organized around domain route modules. The FastAPI application registers routes for authentication, users, items, chat, schedule, graph, profile, and dashboard. Each route module owns a specific external contract. Schemas define request and response shapes, while services handle domain logic.
+
+\begin{table}[H]
+\centering
+\caption{API route domains}
+\label{tab:route-domains}
+\begin{tabular}{|p{0.20\textwidth}|p{0.64\textwidth}|}
+\hline
+\textbf{Route module} & \textbf{Purpose}\\
+\hline
+\texttt{auth.py} & Register and login users, returning bearer tokens for protected endpoints.\\
+\hline
+\texttt{users.py} & Retrieve and update user profile data.\\
+\hline
+\texttt{items.py} & Create, read, update, and delete life database items.\\
+\hline
+\texttt{chat.py} & Process chat messages and return structured assistant responses.\\
+\hline
+\texttt{schedule.py} & Retrieve schedule blocks and export calendar files.\\
+\hline
+\texttt{graph.py} & Retrieve graph data, manage links, and run graph analysis.\\
+\hline
+\texttt{profile.py} & Manage profile memory and guided questionnaire context.\\
+\hline
+\texttt{dashboard.py} & Aggregate analytics for dashboard telemetry and visual summaries.\\
+\hline
+\end{tabular}
+\end{table}
+
+FastAPI's OpenAPI generation is used as documentation evidence. The final documentation package includes a standalone ReDoc HTML export and the raw OpenAPI JSON schema. This supports examiner review even when the backend is not running.
+
+\section{Deployment Design}
+
+The deployment design assumes a browser-based frontend, an application host running frontend and backend services, a SQLite database for the thesis prototype, and an external LLM provider API. The local development setup uses a frontend service on port 5173 and a backend service on port 8000. Production deployment would require additional hardening, but the thesis scope focuses on a controlled prototype environment.
+
+\pendingfigure{../diagrams/deployment/diagram.png}{Export \texttt{docs/diagrams/deployment/diagram.puml} to PNG.}{Deployment configuration for the thesis prototype.}{fig:deployment}
+
+The deployment design highlights the external dependency boundary. The browser talks to the application, the backend talks to the database, and only the backend talks to the external LLM provider. Secrets such as API keys are loaded from environment configuration, not committed into source code.
+
+\section{Design Trade-Offs}
+
+The most important trade-off is between simplicity and personalization. A generic assistant could be implemented with a single chat endpoint and no memory. That would be easier, but it would not address the thesis objective. A highly sophisticated personal model would be more personalized, but it would be difficult to implement and evaluate safely in the thesis timeframe. ClearMind chooses a middle path: categorized profile memory with user review.
+
+Another trade-off is database choice. SQLite is suitable for local development, demonstration, and thesis evaluation. It reduces operational complexity and keeps the prototype easy to run. However, SQLite is not the recommended choice for high-concurrency multi-user production. The design keeps SQLAlchemy as an abstraction so that a future PostgreSQL migration is possible without rewriting all domain logic.
+
+A third trade-off is evaluation depth. A large longitudinal user study would provide stronger evidence about productivity impact, but it is outside the time and resource constraints of the project. The thesis therefore uses functional validation, technical tests, coverage, and qualitative observations. This is appropriate for a software engineering thesis prototype, provided the limitations are stated clearly.
+
+\section{Design Summary}
+
+The design transforms the thesis concept into an implementable architecture. The system is not a standalone prompt; it is a full-stack application with explicit layers, typed boundaries, user-scoped persistence, editable memory, and documented API contracts. The diagrams and tables in this chapter define how the implementation should behave and provide the bridge from requirements to code.

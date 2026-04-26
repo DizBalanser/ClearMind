@@ -1,0 +1,149 @@
+\chapter{Operational Manual Excerpt}
+
+\section{Purpose}
+
+This appendix provides a concise operational manual for running, demonstrating, and reviewing the ClearMind prototype. The full user manual exists as a separate project document, but including an excerpt in the thesis makes the final PDF more self-contained for examiners.
+
+\section{Local Runtime Assumptions}
+
+The prototype is designed for a local thesis demonstration environment. The expected services are:
+
+\begin{itemize}
+  \item backend service running at \texttt{http://localhost:8000};
+  \item frontend service running at \texttt{http://localhost:5173};
+  \item SQLite development database available to the backend;
+  \item external LLM provider key configured through environment settings;
+  \item a demonstration user account with non-sensitive seeded data.
+\end{itemize}
+
+The local setup is sufficient for thesis review because the objective is to demonstrate architecture, workflows, and evaluation evidence. It is not intended to represent a hardened production deployment.
+
+\section{Recommended Demonstration Data}
+
+The demonstration should include realistic but non-sensitive data. A strong demo account should contain:
+
+\begin{itemize}
+  \item at least five task items with different priorities and statuses;
+  \item at least three ideas or thoughts connected to thesis or productivity goals;
+  \item at least three profile memory facts across identity, constraint, and goal categories;
+  \item at least two graph links between related items;
+  \item at least one schedule block or generated plan;
+  \item at least one prior chat exchange showing structured assistant output.
+\end{itemize}
+
+The data should be specific enough to make screenshots meaningful. For example, a task titled ``Prepare thesis defense slides'' is better than a generic item titled ``Task 1''. At the same time, the data should avoid private email addresses, real passwords, API keys, or personal information unrelated to the thesis.
+
+\section{Suggested Demo Script}
+
+The recommended final walkthrough order is:
+
+\begin{enumerate}
+  \item Open the landing page and explain the purpose of ClearMind.
+  \item Log in with the demonstration account.
+  \item Open the dashboard and explain the role of summary telemetry.
+  \item Open chat and submit a brain-dump message containing tasks, ideas, and a memory-relevant statement.
+  \item Show the structured assistant response and explain how it reduces manual organization.
+  \item Open My Life Database and show persisted tasks, ideas, filters, and status controls.
+  \item Switch to the graph view and explain item relationships.
+  \item Open schedule view and show time blocks or calendar export.
+  \item Open profile memory and show active context facts plus update history.
+  \item Open API documentation and explain that the backend contract is generated from FastAPI.
+  \item Show coverage and CI evidence.
+  \item Close with limitations and future work.
+\end{enumerate}
+
+This script matches the thesis narrative: problem, interaction, structure, personalization, evaluation, and limitations.
+
+\section{Reviewer Checklist}
+
+The reviewer can use the following checklist to inspect the prototype.
+
+\begin{longtable}{|p{0.35\textwidth}|p{0.45\textwidth}|p{0.10\textwidth}|}
+\caption{Operational reviewer checklist}
+\label{tab:reviewer-checklist}\\
+\hline
+\textbf{Check} & \textbf{Expected result} & \textbf{Status}\\
+\hline
+Landing page opens & Product value proposition and authentication entry are visible. & \\
+\hline
+Login succeeds & User enters protected workspace. & \\
+\hline
+Protected route guard works & Unauthenticated access is prevented. & \\
+\hline
+Dashboard renders & Summary cards and activity sections appear without layout failure. & \\
+\hline
+Chat accepts input & User message is echoed and backend response is displayed. & \\
+\hline
+Structured output appears & Items, schedules, reflections, or memory candidates are shown when produced. & \\
+\hline
+Database item can be changed & Item creation, update, delete, or status toggle persists. & \\
+\hline
+Graph view loads & Nodes and relationships are visible or empty-state guidance is shown. & \\
+\hline
+Schedule export is available & The user can export calendar data when schedule blocks exist. & \\
+\hline
+Profile memory is editable & Context facts can be created, updated, and deleted. & \\
+\hline
+API docs open & ReDoc or OpenAPI output is available in the documentation artifact. & \\
+\hline
+Coverage evidence exists & Test coverage report shows passing threshold. & \\
+\hline
+CI evidence exists & Pipeline evidence shows lint, test, and coverage gates. & \\
+\hline
+\end{longtable}
+
+\section{Failure Handling During Demonstration}
+
+Because the prototype uses an external LLM provider, the demonstration should be prepared for dependency failures. If the model API is unavailable, the presenter should still be able to explain the system using:
+
+\begin{itemize}
+  \item screenshots embedded in the thesis;
+  \item a recorded walkthrough;
+  \item seeded database state;
+  \item API documentation artifacts;
+  \item test and coverage evidence.
+\end{itemize}
+
+This is not a weakness of the thesis; it is a realistic property of applied AI systems. External AI dependencies must be treated as services that can fail. The software architecture therefore includes fallbacks, mocks in tests, and documentation evidence outside the live runtime.
+
+\section{Final Submission Checklist}
+
+Before final PDF submission, perform the following steps:
+
+\begin{enumerate}
+  \item Export PlantUML diagrams to PNG files.
+  \item Capture all screenshots listed in Appendix A.
+  \item Build the LaTeX document with \texttt{pdflatex}, \texttt{biber}, and two final \texttt{pdflatex} passes.
+  \item Inspect the table of contents, figure list, table list, bibliography, and appendix numbering.
+  \item Confirm that the final page count is between 80 and 85 pages, or at least within the accepted thesis range.
+  \item Check that no screenshot exposes secrets or private personal data.
+  \item Verify that every placeholder has either been replaced by an image or intentionally kept as a draft marker.
+  \item Send the compiled PDF and source folder to the supervisor for final review.
+\end{enumerate}
+
+\section{If the Page Count Is Too Low}
+
+If the compiled document is below the target range, the best expansion areas are:
+
+\begin{itemize}
+  \item add quantitative latency and cost tables to Chapter 6;
+  \item add a small usability questionnaire summary if available;
+  \item expand Chapter 5 with endpoint-by-endpoint implementation details;
+  \item include more final screenshots;
+  \item keep Appendix C and Appendix D in the submitted PDF.
+\end{itemize}
+
+\section{If the Page Count Is Too High}
+
+If the compiled document exceeds the target range, reduce length in this order:
+
+\begin{enumerate}
+  \item move Appendix D to supporting material outside the PDF;
+  \item shorten Appendix C by keeping only story summaries;
+  \item reduce repeated implementation explanation in Chapter 5;
+  \item keep diagrams and screenshots because they are higher-value evidence than repeated prose.
+\end{enumerate}
+
+\section{Operational Summary}
+
+The operational review process should demonstrate that ClearMind is not only a written design. The system has runnable frontend and backend components, persistent data models, AI-assisted workflows, API documentation, tests, coverage evidence, and a prepared final thesis narrative. The screenshots and recorded walkthrough provide resilience for defense conditions where live services may be unreliable.

@@ -1,0 +1,90 @@
+\chapter{Screenshot and Figure Checklist}
+
+\section{Purpose}
+
+This appendix lists the visual assets required before the final PDF submission. The thesis source is already prepared to include these images automatically when they are saved in the expected locations. Until then, the PDF will show clearly labeled placeholders. This allows compilation and supervisor review to continue while the final screenshots are being captured.
+
+\section{PlantUML Diagram Exports}
+
+The repository currently contains PlantUML source files for the main diagrams. Export each source file to a PNG with the same folder and file name shown below.
+
+\begin{longtable}{|p{0.33\textwidth}|p{0.47\textwidth}|p{0.10\textwidth}|}
+\caption{Required diagram exports}
+\label{tab:diagram-checklist}\\
+\hline
+\textbf{Expected PNG} & \textbf{Source file} & \textbf{Status}\\
+\hline
+\texttt{../diagrams/ui\_plan/diagram.png} & \texttt{docs/diagrams/ui\_plan/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/use\_case/diagram.png} & \texttt{docs/diagrams/use\_case/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/system\_architecture/diagram.png} & \texttt{docs/diagrams/system\_architecture/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/package\_structure/diagram.png} & \texttt{docs/diagrams/package\_structure/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/class\_design/diagram.png} & \texttt{docs/diagrams/class\_design/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/state\_machine/diagram.png} & \texttt{docs/diagrams/state\_machine/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/interaction/diagram.png} & \texttt{docs/diagrams/interaction/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/user\_interface\_design/diagram.png} & \texttt{docs/diagrams/user\_interface\_design/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/database\_design/diagram.png} & \texttt{docs/diagrams/database\_design/diagram.puml} & Pending\\
+\hline
+\texttt{../diagrams/deployment/diagram.png} & \texttt{docs/diagrams/deployment/diagram.puml} & Pending\\
+\hline
+\end{longtable}
+
+\section{Application Screenshots to Capture}
+
+Capture screenshots at a readable desktop resolution, preferably 1440 by 900 or higher. Avoid including private credentials, API keys, browser password managers, or unrelated desktop notifications. Use seeded demonstration data that is realistic but not sensitive.
+
+\begin{longtable}{|p{0.28\textwidth}|p{0.45\textwidth}|p{0.15\textwidth}|}
+\caption{Required application screenshots}
+\label{tab:screenshot-checklist}\\
+\hline
+\textbf{File path} & \textbf{What to capture} & \textbf{Chapter}\\
+\hline
+\texttt{images/screenshots/dashboard.png} & Authenticated dashboard with telemetry cards and trend sections visible. & 5\\
+\hline
+\texttt{images/screenshots/chat\_response.png} & Chat exchange where the assistant returns structured items and memory candidates. & 5\\
+\hline
+\texttt{images/screenshots/life\_database.png} & My Life Database page with tasks, ideas, filters, and status controls. & 5\\
+\hline
+\texttt{images/screenshots/knowledge\_graph.png} & Graph view with item nodes and relationships visible. & 5\\
+\hline
+\texttt{images/screenshots/schedule.png} & Schedule page with grouped blocks and export control. & 5\\
+\hline
+\texttt{images/screenshots/profile\_memory.png} & Profile page showing active context facts and update history. & 5\\
+\hline
+\texttt{images/screenshots/api\_docs.png} & ReDoc page opened from \texttt{docs/api/index.html}. & 5\\
+\hline
+\texttt{images/screenshots/coverage\_report.png} & Test or coverage output showing 86.94 percent coverage. & 5--6\\
+\hline
+\texttt{images/screenshots/ci\_success.png} & CI pipeline page showing passing lint/test/coverage gates. & 5--6\\
+\hline
+\texttt{images/screenshots/runtime\_status.png} & Clean runtime evidence showing frontend/backend running or health check status. & 5\\
+\hline
+\texttt{images/screenshots/manual\_walkthrough.png} & Representative screen from the recorded final demo walkthrough. & 6\\
+\hline
+\end{longtable}
+
+\section{Recommended Screenshot Order}
+
+The fastest capture order is:
+
+\begin{enumerate}
+  \item Start backend and frontend.
+  \item Log in with a demonstration user.
+  \item Seed or create several tasks, ideas, context facts, and graph relationships.
+  \item Capture dashboard, chat, database, graph, schedule, and profile pages.
+  \item Open generated API documentation and capture the overview page.
+  \item Run or open coverage evidence and capture the result.
+  \item Open CI evidence and capture the passing pipeline.
+  \item Record the final walkthrough and capture one representative frame.
+\end{enumerate}
+
+\section{Image Quality Rules}
+
+Each screenshot should be readable in print. Prefer light mode if dark-mode contrast is weak on paper. Crop only irrelevant browser chrome, not important application state. Keep filenames exactly as specified so the LaTeX source can discover the images without edits. If an image contains sensitive content, replace the data with demonstration values before capturing it.

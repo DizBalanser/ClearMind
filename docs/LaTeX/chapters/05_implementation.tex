@@ -1,0 +1,213 @@
+\chapter{Implementation}
+
+\section{Implementation Overview}
+
+The implemented prototype is a full-stack web application named ClearMind. The frontend is built with React, TypeScript, Vite, and Tailwind. The backend is built with FastAPI, SQLAlchemy, Pydantic, pytest, and a Gemini-based LLM integration. The repository also contains documentation, diagrams, generated API artifacts, and evaluation reports.
+
+The implementation follows the architecture described in Chapter 4. Frontend pages communicate with backend API routes. Backend routes validate requests, enforce authentication, call service functions, and persist data through SQLAlchemy models. LLM calls are placed behind service and agent boundaries. The final documentation package connects the implementation to requirements and evaluation evidence.
+
+\section{Frontend Implementation}
+
+The frontend application is organized around route-based pages. The public route displays the landing page and authentication modal. Protected routes are wrapped by an authentication guard and rendered inside a shared layout. The main protected pages are dashboard, chat, database, schedule, and profile.
+
+\begin{table}[H]
+\centering
+\caption{Frontend page implementation}
+\label{tab:frontend-pages}
+\begin{tabular}{|p{0.24\textwidth}|p{0.60\textwidth}|}
+\hline
+\textbf{Page} & \textbf{Role in the prototype}\\
+\hline
+Landing page & Introduces the product and starts authentication.\\
+\hline
+Onboarding & Captures initial profile context such as occupation, goals, and preferences.\\
+\hline
+Dashboard & Shows activity summaries, telemetry cards, and trend-oriented overview information.\\
+\hline
+Chat & Provides the primary conversational interface to the orchestrated assistant.\\
+\hline
+My Life Database & Lets the user create, update, delete, filter, and inspect structured items.\\
+\hline
+Schedule View & Shows generated planning blocks and supports calendar export.\\
+\hline
+User Profile & Lets the user review and curate long-term profile memory.\\
+\hline
+\end{tabular}
+\end{table}
+
+The routing structure reflects the distinction between public and protected views. This is visible in the frontend entry point, where the protected pages are nested under a guarded layout. The design ensures that the user does not accidentally access personal data without an authenticated session.
+
+\begin{lstlisting}[caption={Simplified frontend route structure},label={lst:frontend-routes}]
+<Routes>
+  <Route path="/" element={<LandingPage />} />
+  <Route path="/onboarding" element={
+    <ProtectedRoute><Onboarding /></ProtectedRoute>
+  } />
+  <Route element={
+    <ProtectedRoute><Layout /></ProtectedRoute>
+  }>
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/chat" element={<Chat />} />
+    <Route path="/database" element={<MyLifeDatabase />} />
+    <Route path="/schedule" element={<ScheduleView />} />
+    <Route path="/profile" element={<UserProfile />} />
+  </Route>
+</Routes>
+\end{lstlisting}
+
+The frontend also implements interaction quality requirements. Pages use loading states while requests are in progress. Empty states are rendered when no data exists. Error paths are designed to preserve navigation and provide recoverable feedback. These behaviors are important because an assistant should remain usable even when a model call, database request, or analytics fetch fails.
+
+\screenshotfigure{images/screenshots/dashboard.png}{Capture the authenticated dashboard with telemetry cards and trend sections visible.}{Dashboard page of the final prototype.}{fig:screenshot-dashboard}
+
+\section{Backend Application Entry Point}
+
+The backend application is initialized in the FastAPI entry point. It loads settings, initializes database tables, configures CORS, registers route modules, and exposes root and health endpoints. This entry point is intentionally compact. Domain logic is not implemented directly in the main file; it is delegated to route modules and services.
+
+\begin{lstlisting}[language=Python,caption={Backend application setup},label={lst:backend-main}]
+app = FastAPI(
+    title="Personal Digital Twin Assistant API",
+    description="Backend API for the Personal Digital Twin productivity assistant",
+    version="1.0.0",
+)
+
+app.include_router(auth.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(items.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
+app.include_router(schedule.router, prefix="/api")
+app.include_router(graph.router, prefix="/api")
+app.include_router(profile.router, prefix="/api")
+app.include_router(dashboard.router, prefix="/api")
+\end{lstlisting}
+
+This structure satisfies the maintainability requirement that backend concerns remain modularized by route, service, and model boundaries. It also makes API documentation generation straightforward because FastAPI can collect route metadata and schema definitions from the registered modules.
+
+\section{Authentication and Protected Data Access}
+
+The assistant stores personal information, so authentication is a core feature rather than a visual add-on. The backend provides registration and login routes and returns bearer tokens. Protected route dependencies identify the current user and allow downstream route functions to scope database queries by user identity.
+
+The frontend mirrors this model by guarding protected routes. If the user is not authenticated, protected content should not render. This relationship between frontend protection and backend authorization is important: the frontend improves user experience, but the backend remains the final authority for data access.
+
+The implementation uses environment configuration for sensitive values. Runtime secrets such as provider API keys should be stored in environment files or deployment settings, not in committed code. This supports the security non-functional requirements and reduces accidental exposure.
+
+\section{Item and Life Database Implementation}
+
+The life database stores tasks, ideas, and thoughts. Items contain a title, description, category, optional subcategory, life area, deadline, priority, status, creation time, and update time. This model supports the transformation from unstructured input to structured productivity artifacts.
+
+Users can create items manually or receive extracted items through the chat workflow. This dual path is important because not all useful information originates from AI processing. Sometimes the user wants direct control through forms. At other times, a natural-language message is faster. Both paths converge in the same persistent database model.
+
+\screenshotfigure{images/screenshots/life_database.png}{Capture the My Life Database page with several tasks, ideas, filters, and status controls visible.}{Life database item management page.}{fig:screenshot-database}
+
+\section{Chat Orchestration Implementation}
+
+The chat route is the central AI workflow. It receives a user message, loads relevant user information, saves conversation context, calls the orchestrator, and returns a normalized response. The orchestrator classifies intent and delegates to one of the specialized agents.
+
+\begin{lstlisting}[language=Python,caption={Simplified orchestrator routing logic},label={lst:orchestrator}]
+def route_and_execute(self, user_input, user_profile, chat_history, db, user_id):
+    routing = self._classify_intent(user_input)
+    agent_name = routing.get("agent", "brain_dump")
+
+    if agent_name == "brain_dump":
+        return self._run_brain_dump(user_input, user_profile, chat_history, db, user_id)
+    elif agent_name == "reflection":
+        return self._run_reflection(user_input, user_profile, chat_history, db, user_id)
+    elif agent_name == "scheduler":
+        return self._run_scheduler(user_input, user_profile, chat_history, db, user_id)
+    elif agent_name == "planner":
+        return self._run_planner(user_input, user_profile, chat_history, db, user_id)
+    else:
+        return self._run_brain_dump(user_input, user_profile, chat_history, db, user_id)
+\end{lstlisting}
+
+The routing fallback is deliberate. If classification fails or returns an unknown agent, the system falls back to the brain-dump path. This preserves usability because the user is still likely to receive a general organizational response rather than an application error.
+
+\screenshotfigure{images/screenshots/chat_response.png}{Capture a complete chat exchange where the assistant returns structured items and memory candidates.}{Conversational workflow with structured assistant output.}{fig:screenshot-chat}
+
+\section{Structured Response Schemas}
+
+The backend uses Pydantic schemas to define structured request and response models. The chat response can include text, extracted items, schedule blocks, reflection summaries, links, and memory candidates. These schemas act as contracts between the backend, frontend, and AI layer.
+
+\begin{table}[H]
+\centering
+\caption{Representative schema groups}
+\label{tab:schema-groups}
+\begin{tabular}{|p{0.25\textwidth}|p{0.58\textwidth}|}
+\hline
+\textbf{Schema group} & \textbf{Purpose}\\
+\hline
+Authentication schemas & Registration, login, and token responses.\\
+\hline
+Item schemas & Manual item creation, update, and item response data.\\
+\hline
+Chat schemas & User message input, structured assistant output, and message history.\\
+\hline
+Memory schemas & User context entries, profile updates, and memory candidates.\\
+\hline
+Graph schemas & Nodes, links, graph analysis inputs, and graph responses.\\
+\hline
+Dashboard schemas & Aggregated analytics and telemetry output.\\
+\hline
+\end{tabular}
+\end{table}
+
+Typed schemas reduce the risk of UI instability. If an LLM response is malformed, the backend can detect that before returning invalid data to the frontend. This also supports automated tests because expected shapes are explicit.
+
+\section{Profile Memory Implementation}
+
+The profile memory implementation is one of the central contributions of the prototype. The system stores active long-term context entries and a history of profile update events. Context entries are categorized as identity, constraint, goal, or general. Each entry may include source and confidence metadata.
+
+The memory workflow has three entry paths. First, the user can create a context fact explicitly from the profile page. Second, the user can answer guided questions and allow the backend to convert those answers into context entries. Third, the assistant can extract candidate facts from chat messages and present them for user review.
+
+This design preserves user control. Candidate memory is not treated the same as accepted memory. The user can choose which facts become durable context. The user can also correct or delete facts later.
+
+\screenshotfigure{images/screenshots/profile_memory.png}{Capture the profile page showing active context facts, categories, and recent update events.}{Profile memory management page.}{fig:screenshot-profile}
+
+\section{Knowledge Graph Implementation}
+
+The knowledge graph represents relationships between items. It helps the user move beyond a flat list of tasks and ideas. A task may depend on another task, an idea may be related to a goal, or two thoughts may belong to the same life area. The graph module supports retrieval, manual link creation, link deletion, and AI-assisted analysis.
+
+Integrity checks prevent invalid graph state. Self-links are rejected because they do not add useful information. Duplicate links are rejected because they clutter the graph. Cross-user links are rejected because they violate data ownership. These checks are small implementation details, but they are important for reliability and privacy.
+
+\screenshotfigure{images/screenshots/knowledge_graph.png}{Capture the database graph view or graph analysis page with nodes and relationships visible.}{Knowledge graph exploration page.}{fig:screenshot-graph}
+
+\section{Scheduling Implementation}
+
+The schedule module transforms planning requests and pending tasks into scheduled blocks. The assistant can return proposed blocks through chat, and the schedule view displays them grouped by date and time. Export support allows the user to generate an \texttt{.ics} file for calendar integration.
+
+The scheduler demonstrates the thesis claim that the assistant is not only conversational. It creates artifacts that can be used outside the chat interface. In future production work, the schedule module could connect directly to calendar APIs. For the thesis scope, local schedule visualization and export are sufficient.
+
+\screenshotfigure{images/screenshots/schedule.png}{Capture the schedule page with grouped blocks and the calendar export control visible.}{Schedule view with export support.}{fig:screenshot-schedule}
+
+\section{Dashboard Implementation}
+
+The dashboard aggregates high-level activity information. It is intended as the command center of the assistant. It gives the user a summary of recent behavior, item state, and productivity signals. The dashboard is also useful in the thesis because it provides a visual way to show that backend data is integrated into the frontend.
+
+The dashboard route aggregates data from the database and returns a response consumed by the frontend. Automated tests cover dashboard analytics behavior, which supports the evaluation claims in Chapter 6.
+
+\section{API Documentation Export}
+
+FastAPI provides interactive API documentation at runtime, but the thesis package also includes a standalone API documentation export. The script \texttt{src/backend/scripts/export\_api\_docs.py} writes OpenAPI JSON and a ReDoc HTML page to \texttt{docs/api}. This is useful for final review because the API contract can be inspected without running the server.
+
+\screenshotfigure{images/screenshots/api_docs.png}{Open \texttt{docs/api/index.html} and capture the ReDoc API documentation overview.}{Standalone API documentation generated from FastAPI OpenAPI schema.}{fig:screenshot-api-docs}
+
+\section{Testing and CI Implementation}
+
+The backend includes pytest tests for structured JSON parsing, profile memory behavior, dashboard analytics, route behavior, and orchestrator paths. External model behavior is mocked where needed so that tests are deterministic. This separation is important because live LLM calls may fail due to rate limits, network issues, or provider behavior changes.
+
+The CI pipeline is configured through GitHub Actions. It installs dependencies, runs static analysis with Ruff, and executes pytest with an enforced coverage threshold. The final reported coverage is 86.94\%, above the 80\% threshold required by the milestone evidence.
+
+\screenshotfigure{images/screenshots/coverage_report.png}{Capture the test or coverage output showing the 86.94 percent coverage result.}{Automated test coverage evidence.}{fig:screenshot-coverage}
+
+\screenshotfigure{images/screenshots/ci_success.png}{Capture the GitHub Actions or CI page showing a successful quality pipeline run.}{CI pipeline success evidence.}{fig:screenshot-ci}
+
+\section{Deployment and Runtime Configuration}
+
+The thesis prototype is intended to run in a controlled local or single-host environment. The backend runs on port 8000 and the frontend runs on port 5173 during development. The backend uses environment configuration for allowed origins, database URL, authentication settings, and LLM provider keys. The SQLite database is adequate for local demonstration.
+
+\screenshotfigure{images/screenshots/runtime_status.png}{Capture the running frontend and backend health or terminal status in a clean demonstration setup.}{Runtime status evidence for the final prototype.}{fig:screenshot-runtime}
+
+The deployment design can be extended. A production version should use PostgreSQL, stricter secret management, HTTPS termination, monitoring, backups, rate limiting, and more robust model-failure handling. These are future-work concerns rather than blockers for the thesis prototype.
+
+\section{Implementation Summary}
+
+The implementation realizes the requirements through a conventional but AI-aware full-stack architecture. The frontend provides the interaction surfaces. The backend provides domain routes and typed contracts. The service layer integrates LLM reasoning behind controlled boundaries. The data model persists user-owned state. Tests, CI, and API documentation provide evidence that the implementation is not only a visual mockup but a functional and reviewable prototype.

@@ -1,0 +1,177 @@
+\documentclass[a4paper,12pt,oneside]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[left=35mm,right=25mm,top=25mm,bottom=25mm,headheight=16pt]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{csquotes}
+\usepackage[
+  backend=biber,
+  style=numeric,
+  sorting=none
+]{biblatex}
+\usepackage[pdfborder={0 0 0},unicode,pdfusetitle]{hyperref}
+\usepackage{bookmark}
+
+\addbibresource{references.bib}
+
+\setstretch{1.427465}
+\frenchspacing
+\sloppy
+\setlength{\parindent}{3.5ex}
+\setlength{\parskip}{0pt}
+
+\definecolor{codebackg}{rgb}{0.95,0.95,0.95}
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  numbers=left,
+  numberstyle=\tiny,
+  backgroundcolor=\color{codebackg},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{purple},
+  stepnumber=1,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2,
+  breaklines=true,
+  frame=lines,
+  captionpos=b
+}
+
+\graphicspath{{images/}{../diagrams/}{../../docs/diagrams/}}
+
+\newcommand{\thesistitle}{Design and Implementation of a Personal Digital Twin Assistant for Productivity and Self-Management}
+\newcommand{\thesisauthor}{Zhamurzaev Sanatbek}
+\newcommand{\thesissupervisor}{Dr. Walid}
+\newcommand{\thesisuniversity}{Eotvos Lorand University}
+\newcommand{\thesisfaculty}{Faculty of Informatics}
+\newcommand{\thesisdepartment}{Department of Software Technology and Methodology}
+\newcommand{\thesiscity}{Budapest}
+\newcommand{\thesisyear}{2026}
+\newcommand{\thesisdegree}{Computer Science BSc}
+
+\newcommand{\pendingfigure}[4]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{#1}{%
+      \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{#1}%
+    }{%
+      \fbox{\begin{minipage}[c][0.28\textheight][c]{0.88\textwidth}
+        \centering
+        \textbf{Pending visual asset}\\[0.6em]
+        #2\\[0.6em]
+        \small Expected file: \texttt{\detokenize{#1}}
+      \end{minipage}}%
+    }
+    \caption{#3}
+    \label{#4}
+  \end{figure}
+}
+
+\newcommand{\screenshotfigure}[4]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{#1}{%
+      \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{#1}%
+    }{%
+      \fbox{\begin{minipage}[c][0.30\textheight][c]{0.88\textwidth}
+        \centering
+        \textbf{Screenshot required}\\[0.6em]
+        #2\\[0.6em]
+        \small Save the image as: \texttt{\detokenize{#1}}
+      \end{minipage}}%
+    }
+    \caption{#3}
+    \label{#4}
+  \end{figure}
+}
+
+\begin{document}
+
+\begin{titlepage}
+  \begin{center}
+    {\scshape\Large \thesisuniversity\par}
+    \vspace{0.2cm}
+    {\scshape\Large \thesisfaculty\par}
+    \vspace{0.2cm}
+    {\scshape\large \thesisdepartment\par}
+    \vspace{4.5cm}
+    {\bfseries\LARGE \thesistitle\par}
+    \vspace{3.5cm}
+    \begin{tabular}{ l c l }
+      {\itshape Supervisor:} & \hspace{3.5cm} & {\itshape Author:}\\
+      {\large \thesissupervisor} & \hspace{3.5cm} & {\large \thesisauthor}\\
+      & & \thesisdegree
+    \end{tabular}
+    \vfill
+    {\itshape \thesiscity, \thesisyear}
+  \end{center}
+\end{titlepage}
+
+\pagenumbering{gobble}
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+This thesis presents the design and implementation of ClearMind, a Personal Digital Twin Assistant for productivity and self-management. The system combines a conversational web interface, large-language-model reasoning, user-specific long-term memory, and modular productivity services to transform unstructured thoughts into actionable tasks, schedules, reflections, and personal context updates. The work addresses the practical problem that existing productivity tools require continuous manual organization and rarely adapt to the user's habits, constraints, and goals.
+
+The implemented prototype follows a layered architecture: a React and TypeScript frontend, a FastAPI backend, SQLAlchemy persistence, and a service layer that routes user input to specialized agents for brain-dump processing, scheduling, reflection, planning, graph analysis, and profile memory management. The thesis documents the requirements, design decisions, implementation details, validation strategy, and evaluation results of the prototype. The final system demonstrates end-to-end operation across authentication, chat orchestration, life database management, schedule export, knowledge graph exploration, profile memory curation, dashboard analytics, API documentation, and automated test coverage.
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+I would like to thank my supervisor, \thesissupervisor, for guidance during the definition, implementation, and evaluation of this thesis project. I also thank the Faculty of Informatics for providing the academic context in which the project could be developed and reviewed. Finally, I thank the people who helped test the prototype, review the documentation, and provide feedback on the usability of the assistant.
+
+\tableofcontents
+\cleardoublepage
+\pagenumbering{arabic}
+
+\input{chapters/01_introduction}
+\cleardoublepage
+\input{chapters/02_background}
+\cleardoublepage
+\input{chapters/03_requirements}
+\cleardoublepage
+\input{chapters/04_design}
+\cleardoublepage
+\input{chapters/05_implementation}
+\cleardoublepage
+\input{chapters/06_evaluation}
+\cleardoublepage
+\input{chapters/07_conclusion}
+\cleardoublepage
+
+\appendix
+\input{appendices/a_screenshot_checklist}
+\cleardoublepage
+\input{appendices/b_traceability}
+\cleardoublepage
+\input{appendices/c_detailed_user_stories}
+\cleardoublepage
+\input{appendices/d_operational_manual}
+\cleardoublepage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\printbibliography[title={Bibliography}]
+\cleardoublepage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\cleardoublepage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+
+\end{document}
