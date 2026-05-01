@@ -134,7 +134,7 @@ The focus is on demonstrating **how personalization and contextual memory improv
 ### 📦 Deliverables
 - `/results/evaluation_summary.md` and `/results/test_coverage_report.md` — test results and evaluation summaries  
 - `/docs/user_manual/final_manual.md`  
-- Recorded demo walkthrough (submission artifact)  
+- Screenshot, API, coverage, and CI evidence package  
 - `/docs/thesis/Complete_Thesis_Draft.md`  
 
 ### ✅ Acceptance Criteria

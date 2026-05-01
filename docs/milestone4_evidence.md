@@ -5,7 +5,7 @@
 - CI workflow file: `.github/workflows/ci.yml`
 - Lint gate: `ruff check .`
 - Test command: `pytest --cov=app --cov-fail-under=80`
-- Final reported coverage: **86.94%**
+- Final reported coverage: **86.82%**
 - Coverage threshold status: PASS
 
 ## 2. API Documentation Evidence
@@ -41,4 +41,4 @@
 ## 6. Demonstration Evidence
 
 - Demonstration mode requirement waived for this submission path.
-- Presentation is delivered through a recorded video walkthrough of stable core flows.
+- Presentation evidence is delivered through embedded screenshots, generated API documentation, coverage output, and CI evidence.

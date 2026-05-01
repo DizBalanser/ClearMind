@@ -19,22 +19,19 @@ Run from `docs/LaTeX`:
 ```bash
 pdflatex main.tex
 biber main
+makeglossaries main
 pdflatex main.tex
 pdflatex main.tex
 ```
 
-The document uses `biblatex` with `biber`.
+The document uses `biblatex` with `biber`, and `glossaries` for the glossary and list of acronyms.
 
 ## Required Visual Assets
 
-The thesis is currently compile-safe without final PNG files because `main.tex` renders labeled placeholders when images are missing.
+The thesis expects final screenshots and diagram exports to be present before submission.
 
 Before final submission:
 
-1. Export all PlantUML files under `docs/diagrams/*/diagram.puml` to `diagram.png`.
+1. Confirm all PlantUML exports under `docs/diagrams/*/diagram.png` are present.
 2. Save application screenshots exactly as listed in `appendices/a_screenshot_checklist.tex`.
 3. Rebuild the PDF and inspect all figure captions, references, and list-of-figures entries.
-
-## Page Target
-
-The content is structured for an 80-85 page thesis after diagrams, screenshots, references, and appendices are included. If the compiled PDF is below target, expand Chapter 6 with measured latency/cost/usability tables. If it is above target, move long tables from Chapter 3 or Appendix B into supervisor-only supporting material.

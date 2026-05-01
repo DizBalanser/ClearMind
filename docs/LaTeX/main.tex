@@ -6,6 +6,7 @@
 \usepackage[left=35mm,right=25mm,top=25mm,bottom=25mm,headheight=16pt]{geometry}
 \usepackage{setspace}
 \usepackage{graphicx}
+\usepackage{epstopdf}
 \usepackage{float}
 \usepackage{array}
 \usepackage{longtable}
@@ -14,15 +15,18 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{csquotes}
+\usepackage{amsmath}
 \usepackage[
   backend=biber,
   style=numeric,
   sorting=none
 ]{biblatex}
 \usepackage[pdfborder={0 0 0},unicode,pdfusetitle]{hyperref}
+\usepackage[acronym,toc,nopostdot]{glossaries}
 \usepackage{bookmark}
 
 \addbibresource{references.bib}
+\makeglossaries
 
 \setstretch{1.427465}
 \frenchspacing
@@ -49,18 +53,59 @@
   frame=lines,
   captionpos=b
 }
+\renewcommand{\lstlistlistingname}{List of Codes}
 
 \graphicspath{{images/}{../diagrams/}{../../docs/diagrams/}}
 
 \newcommand{\thesistitle}{Design and Implementation of a Personal Digital Twin Assistant for Productivity and Self-Management}
 \newcommand{\thesisauthor}{Zhamurzaev Sanatbek}
-\newcommand{\thesissupervisor}{Dr. Walid}
-\newcommand{\thesisuniversity}{Eotvos Lorand University}
+\newcommand{\thesissupervisor}{Guettala Walid}
+\newcommand{\thesissupervisordegree}{PhD Candidate}
+\newcommand{\thesisuniversity}{Eötvös Loránd University}
 \newcommand{\thesisfaculty}{Faculty of Informatics}
-\newcommand{\thesisdepartment}{Department of Software Technology and Methodology}
+\newcommand{\thesisdepartment}{Dept. of Artificial Intelligence}
 \newcommand{\thesiscity}{Budapest}
 \newcommand{\thesisyear}{2026}
 \newcommand{\thesisdegree}{Computer Science BSc}
+\newcommand{\thesisemblem}{elte_cimer_szines}
+
+\newacronym{llm}{LLM}{large language model}
+\newacronym{api}{API}{application programming interface}
+\newacronym{jwt}{JWT}{JSON Web Token}
+\newacronym{ci}{CI}{continuous integration}
+\newacronym{crud}{CRUD}{create, read, update, and delete}
+\newacronym{dto}{DTO}{data transfer object}
+\newacronym{orm}{ORM}{object-relational mapper}
+\newacronym{spa}{SPA}{single-page application}
+\newacronym{rest}{REST}{representational state transfer}
+\newacronym{json}{JSON}{JavaScript Object Notation}
+\newacronym{ics}{ICS}{iCalendar file format}
+\newacronym{rag}{RAG}{retrieval-augmented generation}
+
+\newglossaryentry{personal-digital-twin}{
+  name={personal digital twin},
+  description={a software representation of a user that stores relevant context, goals, habits, and productivity state}
+}
+\newglossaryentry{profile-memory}{
+  name={profile memory},
+  description={durable user-approved context facts used by ClearMind to personalize later assistant responses}
+}
+\newglossaryentry{orchestrator}{
+  name={orchestrator},
+  description={the backend service that classifies a chat message and dispatches it to the most suitable specialized agent}
+}
+\newglossaryentry{knowledge-graph}{
+  name={knowledge graph},
+  description={a graph representation of user items and relationships such as dependencies, updates, blockers, and related ideas}
+}
+\newglossaryentry{schema-validation}{
+  name={schema validation},
+  description={the process of checking generated or submitted data against typed Pydantic contracts before it is persisted or returned}
+}
+\newglossaryentry{calendar-export}{
+  name={calendar export},
+  description={the conversion of scheduled ClearMind items into an iCalendar-compatible file for external calendar tools}
+}
 
 \newcommand{\pendingfigure}[4]{%
   \begin{figure}[H]
@@ -70,7 +115,7 @@
     }{%
       \fbox{\begin{minipage}[c][0.28\textheight][c]{0.88\textwidth}
         \centering
-        \textbf{Pending visual asset}\\[0.6em]
+        \textbf{Visual evidence not included in this build}\\[0.6em]
         #2\\[0.6em]
         \small Expected file: \texttt{\detokenize{#1}}
       \end{minipage}}%
@@ -88,7 +133,7 @@
     }{%
       \fbox{\begin{minipage}[c][0.30\textheight][c]{0.88\textwidth}
         \centering
-        \textbf{Screenshot required}\\[0.6em]
+        \textbf{Screenshot evidence not included in this build}\\[0.6em]
         #2\\[0.6em]
         \small Save the image as: \texttt{\detokenize{#1}}
       \end{minipage}}%
@@ -102,18 +147,27 @@
 
 \begin{titlepage}
   \begin{center}
-    {\scshape\Large \thesisuniversity\par}
-    \vspace{0.2cm}
-    {\scshape\Large \thesisfaculty\par}
-    \vspace{0.2cm}
-    {\scshape\large \thesisdepartment\par}
-    \vspace{4.5cm}
-    {\bfseries\LARGE \thesistitle\par}
-    \vspace{3.5cm}
+    \begin{minipage}{0.25\textwidth}
+      \centering
+      \includegraphics[width=0.80\linewidth]{\thesisemblem}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.68\textwidth}
+      \centering
+      {\scshape\Large \thesisuniversity\par}
+      \vspace{0.3cm}
+      {\scshape\Large \thesisfaculty\par}
+      \vspace{0.5cm}
+      {\scshape\large \thesisdepartment\par}
+    \end{minipage}
+    \vspace{4.3cm}
+    \vspace{0.25cm}
+    {\bfseries\Large\thesistitle\par}
+    \vspace{7cm}
     \begin{tabular}{ l c l }
-      {\itshape Supervisor:} & \hspace{3.5cm} & {\itshape Author:}\\
-      {\large \thesissupervisor} & \hspace{3.5cm} & {\large \thesisauthor}\\
-      & & \thesisdegree
+      {\itshape\large Supervisor:} & \hspace{4.0cm} & {\itshape\large Author:}\\
+      {\large \thesissupervisor} & \hspace{4.0cm} & {\large \thesisauthor}\\
+      {\thesissupervisordegree} & \hspace{4.0cm} & {\thesisdegree}
     \end{tabular}
     \vfill
     {\itshape \thesiscity, \thesisyear}
@@ -127,37 +181,21 @@ This thesis presents the design and implementation of ClearMind, a Personal Digi
 
 The implemented prototype follows a layered architecture: a React and TypeScript frontend, a FastAPI backend, SQLAlchemy persistence, and a service layer that routes user input to specialized agents for brain-dump processing, scheduling, reflection, planning, graph analysis, and profile memory management. The thesis documents the requirements, design decisions, implementation details, validation strategy, and evaluation results of the prototype. The final system demonstrates end-to-end operation across authentication, chat orchestration, life database management, schedule export, knowledge graph exploration, profile memory curation, dashboard analytics, API documentation, and automated test coverage.
 
-\chapter*{Acknowledgements}
-\addcontentsline{toc}{chapter}{Acknowledgements}
-I would like to thank my supervisor, \thesissupervisor, for guidance during the definition, implementation, and evaluation of this thesis project. I also thank the Faculty of Informatics for providing the academic context in which the project could be developed and reviewed. Finally, I thank the people who helped test the prototype, review the documentation, and provide feedback on the usability of the assistant.
-
 \tableofcontents
 \cleardoublepage
 \pagenumbering{arabic}
 
-\input{chapters/01_introduction}
+\input{chapters/01_acknowledgement}
 \cleardoublepage
-\input{chapters/02_background}
+\input{chapters/02_introduction}
 \cleardoublepage
-\input{chapters/03_requirements}
+\input{chapters/03_specification}
 \cleardoublepage
-\input{chapters/04_design}
+\input{chapters/04_user_documentation}
 \cleardoublepage
-\input{chapters/05_implementation}
+\input{chapters/05_developer_documentation}
 \cleardoublepage
-\input{chapters/06_evaluation}
-\cleardoublepage
-\input{chapters/07_conclusion}
-\cleardoublepage
-
-\appendix
-\input{appendices/a_screenshot_checklist}
-\cleardoublepage
-\input{appendices/b_traceability}
-\cleardoublepage
-\input{appendices/c_detailed_user_stories}
-\cleardoublepage
-\input{appendices/d_operational_manual}
+\input{chapters/06_conclusions}
 \cleardoublepage
 
 \phantomsection
@@ -173,5 +211,16 @@ I would like to thank my supervisor, \thesissupervisor, for guidance during the 
 \phantomsection
 \addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
+\cleardoublepage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Codes}
+\lstlistoflistings
+\cleardoublepage
+
+\glsaddall
+\printglossary[title={Glossary}]
+\cleardoublepage
+\printglossary[type=\acronymtype,title={Acronyms}]
 
 \end{document}

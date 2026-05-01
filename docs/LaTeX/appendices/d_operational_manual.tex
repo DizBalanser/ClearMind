@@ -35,7 +35,7 @@ The data should be specific enough to make screenshots meaningful. For example, 
 
 \section{Suggested Demo Script}
 
-The recommended final walkthrough order is:
+The recommended final demonstration order is:
 
 \begin{enumerate}
   \item Open the landing page and explain the purpose of ClearMind.
@@ -98,7 +98,7 @@ Because the prototype uses an external LLM provider, the demonstration should be
 
 \begin{itemize}
   \item screenshots embedded in the thesis;
-  \item a recorded walkthrough;
+  \item embedded screenshots and exported diagrams;
   \item seeded database state;
   \item API documentation artifacts;
   \item test and coverage evidence.
@@ -111,39 +111,16 @@ This is not a weakness of the thesis; it is a realistic property of applied AI s
 Before final PDF submission, perform the following steps:
 
 \begin{enumerate}
-  \item Export PlantUML diagrams to PNG files.
-  \item Capture all screenshots listed in Appendix A.
+  \item Confirm PlantUML diagram PNG exports are present.
+  \item Confirm screenshots listed in Appendix A are present and readable.
   \item Build the LaTeX document with \texttt{pdflatex}, \texttt{biber}, and two final \texttt{pdflatex} passes.
   \item Inspect the table of contents, figure list, table list, bibliography, and appendix numbering.
   \item Confirm that the final page count is between 80 and 85 pages, or at least within the accepted thesis range.
   \item Check that no screenshot exposes secrets or private personal data.
-  \item Verify that every placeholder has either been replaced by an image or intentionally kept as a draft marker.
+  \item Verify that no unintended draft marker remains in the final PDF.
   \item Send the compiled PDF and source folder to the supervisor for final review.
-\end{enumerate}
-
-\section{If the Page Count Is Too Low}
-
-If the compiled document is below the target range, the best expansion areas are:
-
-\begin{itemize}
-  \item add quantitative latency and cost tables to Chapter 6;
-  \item add a small usability questionnaire summary if available;
-  \item expand Chapter 5 with endpoint-by-endpoint implementation details;
-  \item include more final screenshots;
-  \item keep Appendix C and Appendix D in the submitted PDF.
-\end{itemize}
-
-\section{If the Page Count Is Too High}
-
-If the compiled document exceeds the target range, reduce length in this order:
-
-\begin{enumerate}
-  \item move Appendix D to supporting material outside the PDF;
-  \item shorten Appendix C by keeping only story summaries;
-  \item reduce repeated implementation explanation in Chapter 5;
-  \item keep diagrams and screenshots because they are higher-value evidence than repeated prose.
 \end{enumerate}
 
 \section{Operational Summary}
 
-The operational review process should demonstrate that ClearMind is not only a written design. The system has runnable frontend and backend components, persistent data models, AI-assisted workflows, API documentation, tests, coverage evidence, and a prepared final thesis narrative. The screenshots and recorded walkthrough provide resilience for defense conditions where live services may be unreliable.
+The operational review process demonstrates that ClearMind is not only a written design. The system has runnable frontend and backend components, persistent data models, AI-assisted workflows, API documentation, tests, coverage evidence, embedded screenshots, and exported diagrams. These artifacts provide resilience for defense conditions where live services may be unreliable.

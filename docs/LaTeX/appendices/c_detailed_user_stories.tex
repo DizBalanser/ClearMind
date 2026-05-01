@@ -157,14 +157,14 @@ This appendix preserves the detailed user story set used during the final protot
 
 \textbf{Acceptance criteria.}
 \begin{itemize}
-  \item Given the defense walkthrough is prepared, when the demonstration starts, then representative data is already available.
-  \item Given live model behavior is unstable, when the recorded walkthrough is used, then the key flows can still be reviewed by the examiner.
+  \item Given the defense evidence package is prepared, when the demonstration starts, then representative data is already available.
+  \item Given live model behavior is unstable, when embedded screenshots and exported artifacts are used, then the key flows can still be reviewed by the examiner.
   \item Given screenshots are included in the thesis, when the PDF is reviewed offline, then the reader can inspect the main workflows without running the project.
 \end{itemize}
 
 \textbf{Edge and error cases.}
 \begin{itemize}
-  \item Given the backend is unavailable during a live demonstration, when the recorded walkthrough is available, then the presenter can still explain completed functionality.
+  \item Given the backend is unavailable during a live demonstration, when the screenshot and API evidence package is available, then the presenter can still explain completed functionality.
   \item Given screenshots contain sensitive data, when final assets are prepared, then they must be recaptured with demonstration values.
-  \item Given final images are missing during draft compilation, when the LaTeX source is built, then placeholders identify the required assets instead of failing the document build.
+  \item Given an image is unavailable during compilation, when the LaTeX source is built, then the figure fallback identifies the expected asset instead of failing the document build.
 \end{itemize}

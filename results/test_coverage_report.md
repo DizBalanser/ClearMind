@@ -10,7 +10,7 @@ pytest --cov=app --cov-fail-under=80
 
 - Test status: PASS
 - Coverage gate: PASS
-- Reported total coverage: **86.94%**
+- Reported total coverage: **86.82%**
 
 ## Interpretation
 

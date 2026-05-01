@@ -163,7 +163,7 @@ The interface plan separates the public entry point from the protected workspace
 
 \pendingfigure{../diagrams/ui_plan/diagram.png}{Export \texttt{docs/diagrams/ui\_plan/diagram.puml} to PNG.}{Planned user interface structure and navigation.}{fig:ui-plan}
 
-The UI plan also supports the screenshot strategy of the thesis. Every major page should have a final screenshot in the submitted version. The screenshot list in Appendix A describes the exact captures required.
+The UI plan also supports the screenshot strategy of the thesis. Every major page should have a final screenshot in the submitted version, and the repository-level screenshot instructions define the exact captures used for the final evidence package.
 
 \section{Feasibility Analysis}
 
@@ -192,7 +192,7 @@ Schedule & The project milestones show that finalization is mostly documentation
 
 \section{Risk Analysis}
 
-The most important risks are LLM hallucination, API rate limits, database limitations, CI instability, traceability gaps, and presentation risk. These risks are not equal. Hallucination and privacy risk are high impact because they can affect trust. SQLite contention is lower in the thesis context because the prototype is local and low concurrency. Presentation risk is mitigated through a recorded walkthrough and screenshot evidence.
+The most important risks are LLM hallucination, API rate limits, database limitations, CI instability, traceability gaps, and presentation risk. These risks are not equal. Hallucination and privacy risk are high impact because they can affect trust. SQLite contention is lower in the thesis context because the prototype is local and low concurrency. Presentation risk is mitigated through seeded demonstration data, embedded screenshots, API documentation, and test evidence.
 
 \begin{longtable}{|p{0.28\textwidth}|p{0.15\textwidth}|p{0.45\textwidth}|}
 \caption{Requirement-level risk matrix}
@@ -208,7 +208,7 @@ SQLite lock or scale limitations & Medium & Keep transactions short and document
 \hline
 Incomplete traceability & Medium & Maintain requirement-to-implementation mapping and cite concrete route, service, model, and test artifacts.\\
 \hline
-Defense/demo instability & Medium & Use recorded walkthrough evidence and capture stable screenshots of final workflows.\\
+Defense/demo instability & Medium & Use stable screenshots, generated API documentation, and captured coverage/CI evidence for final workflows.\\
 \hline
 \end{longtable}
 

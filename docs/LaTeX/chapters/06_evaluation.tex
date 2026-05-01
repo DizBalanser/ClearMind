@@ -44,9 +44,9 @@ Dashboard & Analytics data is aggregated and rendered in frontend summary sectio
 
 The result of this evaluation is that the prototype satisfies the core user journeys defined in Chapter 3. The most important evidence is not that each page exists, but that the pages are connected through backend data and typed API contracts.
 
-\section{Scenario-Based Manual Validation}
+\section{Scenario-Based Visual Validation}
 
-Manual validation was used to check the user experience across realistic flows. These scenarios are written in non-programmer-friendly terms so that a supervisor or examiner can reproduce them during review.
+Scenario-based validation was used to check the user experience across realistic flows. These scenarios are written in non-programmer-friendly terms so that a supervisor or examiner can reproduce them during review, and the corresponding screenshots provide static evidence in the submitted PDF.
 
 \begin{enumerate}
   \item Register a user, log in, and confirm that protected pages are accessible.
@@ -59,9 +59,29 @@ Manual validation was used to check the user experience across realistic flows. 
   \item Open the API documentation artifact and confirm that endpoints are documented.
 \end{enumerate}
 
-\screenshotfigure{images/screenshots/manual_walkthrough.png}{Capture a composite or representative screen from the recorded demo walkthrough.}{Manual walkthrough evidence for the final thesis demonstration.}{fig:screenshot-walkthrough}
+The visual validation is particularly important for UI states. Automated backend tests cannot fully prove whether a loading state, empty state, or error message is understandable to a user. Screenshots provide the visual evidence needed for the thesis defense and show that the implemented UI is more than a backend API demonstration.
 
-The manual validation is particularly important for UI states. Automated backend tests cannot fully prove whether a loading state, empty state, or error message is understandable to a user. Screenshots and recorded walkthroughs provide the visual evidence needed for the thesis defense.
+\begin{longtable}{|p{0.28\textwidth}|p{0.42\textwidth}|p{0.18\textwidth}|}
+\caption{Screenshot-backed evaluation evidence}
+\label{tab:screenshot-evidence}\\
+\hline
+\textbf{Evidence} & \textbf{What it demonstrates} & \textbf{Referenced figure}\\
+\hline
+Dashboard & Telemetry cards, recent activity, and analytics are visible in the authenticated workspace. & Figure~\ref{fig:screenshot-dashboard}\\
+\hline
+Chat response & A natural-language input produces a structured assistant response and candidate artifacts. & Figure~\ref{fig:screenshot-chat}\\
+\hline
+Knowledge graph & Items can be represented as connected nodes and edges rather than only as a flat list. & Figure~\ref{fig:screenshot-graph}\\
+\hline
+Profile memory & Durable user context can be inspected and curated by the user. & Figure~\ref{fig:screenshot-profile}\\
+\hline
+Schedule & Time blocks and calendar export functionality support action after planning. & Figure~\ref{fig:screenshot-schedule}\\
+\hline
+API documentation & The backend contract is exported as a standalone ReDoc/OpenAPI artifact. & Figure~\ref{fig:screenshot-api-docs}\\
+\hline
+Coverage and CI & Automated quality claims are backed by captured command and pipeline evidence. & Figures~\ref{fig:screenshot-coverage} and~\ref{fig:screenshot-ci}\\
+\hline
+\end{longtable}
 
 \section{Automated Testing}
 
@@ -86,7 +106,7 @@ Routes and orchestrator & Verify endpoint behavior and routing paths with contro
 \end{tabular}
 \end{table}
 
-The reported coverage is 86.94\%, above the required 80\% threshold. The enforced command is:
+The reported coverage is 86.82\%, above the required 80\% threshold. The enforced command is:
 
 \begin{lstlisting}[caption={Coverage command used for evaluation},label={lst:coverage-command}]
 pytest --cov=app --cov-fail-under=80
@@ -112,12 +132,12 @@ Automated tests & \texttt{pytest} & Pass\\
 \hline
 Coverage threshold & \texttt{pytest --cov=app --cov-fail-under=80} & Pass\\
 \hline
-Reported coverage & 86.94\% & Pass\\
+Reported coverage & 86.82\% & Pass\\
 \hline
 \end{tabular}
 \end{table}
 
-CI is also an academic traceability tool. It helps demonstrate that quality claims are repeatable. A screenshot of a successful run should be included in the final thesis evidence pack, as listed in Appendix A.
+CI is also an academic traceability tool. It helps demonstrate that quality claims are repeatable. A screenshot of a successful run is included in the final thesis evidence pack alongside the coverage report and generated API documentation.
 
 \section{API Documentation Evaluation}
 
@@ -135,12 +155,34 @@ The API documentation export is part of the final documentation evidence. The ba
 \hline
 \texttt{docs/api/index.html} & Standalone ReDoc page for human-readable endpoint review.\\
 \hline
-\texttt{src/backend/scripts/export\_api\_docs.py} & Script used to export documentation artifacts.\\
+\texttt{export\_api\_docs.py} & Backend script used to export documentation artifacts.\\
 \hline
 \end{tabular}
 \end{table}
 
 This documentation matters because the assistant is not only a frontend demonstration. The API contract is part of the final product. Generated API documentation also reduces manual drift between implementation and documentation.
+
+\section{Empirical Workflow Evidence}
+
+The final prototype was evaluated using a seeded demonstration account with realistic productivity data. The purpose was not to measure a statistically significant productivity improvement, but to verify that the implemented system transforms unstructured input into inspectable artifacts. A representative chat interaction is shown in Listing~\ref{lst:chat-transcript}; the important observation is that the response is not only prose. It can include tasks, schedule blocks, and memory candidates that connect to other pages.
+
+\begin{lstlisting}[caption={Representative ClearMind chat transcript},label={lst:chat-transcript}]
+User:
+I need to finish the thesis screenshots, update the coverage number,
+and prepare my defense outline. Also remember that I prefer working
+late at night because mornings are difficult for me.
+
+ClearMind:
+I grouped this into thesis-finalization tasks and a profile-memory
+candidate. Suggested tasks:
+- Capture final thesis screenshots
+- Update coverage evidence to 86.82%
+- Draft defense outline
+Memory candidate:
+- User prefers late-night work sessions because mornings are difficult.
+\end{lstlisting}
+
+Dashboard evidence complements the transcript because it shows accumulated state rather than a single response. The dashboard aggregates activity counts, profile-memory events, graph connections, pending tasks, and reflections. This verifies that persisted data is available to analytics routes and visible in the frontend. Knowledge graph evidence adds a second empirical check: extracted or manually created items can be linked, filtered for validity, and visualized as relationships. Together, the chat, dashboard, and graph screenshots demonstrate the intended lifecycle: capture, structure, persist, relate, and review.
 
 \section{Usability Discussion}
 
@@ -185,7 +227,7 @@ Several limitations remain.
   \item External LLM behavior is not fully controllable and requires stronger production-grade monitoring, retries, and cost tracking.
   \item The usability evaluation is scenario-based and qualitative rather than statistically significant.
   \item Visual regression testing is not configured for the frontend.
-  \item The final screenshots and diagram PNG exports must be added before final PDF submission.
+  \item A broader evaluation should add latency, cost, and frontend visual-regression measurements.
   \item Some dependency deprecation warnings may remain and should be tracked as maintenance tasks.
 \end{itemize}
 
@@ -193,4 +235,4 @@ These limitations do not invalidate the thesis result. They define the boundary 
 
 \section{Evaluation Summary}
 
-The evaluation shows that ClearMind satisfies the main thesis requirements. The system supports the planned end-to-end workflows, exposes typed API contracts, persists user-scoped data, manages profile memory, includes graph and schedule features, and provides automated backend quality evidence. The reported backend coverage of 86.94\% passes the planned threshold. The remaining work before final submission is mostly visual evidence collection, diagram export, and final language polish.
+The evaluation shows that ClearMind satisfies the main thesis requirements. The system supports the planned end-to-end workflows, exposes typed API contracts, persists user-scoped data, manages profile memory, includes graph and schedule features, and provides automated backend quality evidence. The reported backend coverage of 86.82\% passes the planned 80\% threshold. The remaining work after the thesis is production hardening: broader user studies, latency measurement, stronger monitoring, and deployment-grade infrastructure.

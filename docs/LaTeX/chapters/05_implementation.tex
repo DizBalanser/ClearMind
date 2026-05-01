@@ -102,24 +102,76 @@ Users can create items manually or receive extracted items through the chat work
 
 The chat route is the central AI workflow. It receives a user message, loads relevant user information, saves conversation context, calls the orchestrator, and returns a normalized response. The orchestrator classifies intent and delegates to one of the specialized agents.
 
-\begin{lstlisting}[language=Python,caption={Simplified orchestrator routing logic},label={lst:orchestrator}]
-def route_and_execute(self, user_input, user_profile, chat_history, db, user_id):
-    routing = self._classify_intent(user_input)
-    agent_name = routing.get("agent", "brain_dump")
+The routing decision can be described as a bounded classification problem. For a user message \(m\), the router chooses an agent \(a\) from the set \(A=\{\text{brain\_dump},\text{reflection},\text{scheduler},\text{planner}\}\). The implementation asks the lightweight model for a structured score and then applies the invariant \(a \in A\); otherwise, it falls back to the general brain-dump path:
 
-    if agent_name == "brain_dump":
-        return self._run_brain_dump(user_input, user_profile, chat_history, db, user_id)
-    elif agent_name == "reflection":
-        return self._run_reflection(user_input, user_profile, chat_history, db, user_id)
-    elif agent_name == "scheduler":
-        return self._run_scheduler(user_input, user_profile, chat_history, db, user_id)
-    elif agent_name == "planner":
-        return self._run_planner(user_input, user_profile, chat_history, db, user_id)
-    else:
-        return self._run_brain_dump(user_input, user_profile, chat_history, db, user_id)
+\[
+  a^* = \operatorname*{arg\,max}_{a \in A} P(a \mid m, c)
+\]
+
+where \(c\) is the recent user profile and chat context supplied to the route.
+
+\begin{lstlisting}[language=Python,caption={Implemented orchestrator classification and fallback},label={lst:orchestrator}]
+def _classify_intent(self, user_input: str) -> dict[str, Any]:
+    prompt = f"""You are a router that classifies user messages
+into exactly one agent category.
+
+Return JSON: {{"agent": "brain_dump|reflection|scheduler|planner",
+"confidence": 0.0-1.0, "reasoning": "brief explanation"}}"""
+
+    try:
+        result = generate_json(
+            self.router_model,
+            prompt,
+            RouterLLMResponse,
+            temperature=0.1,
+            max_output_tokens=1024,
+            retries=1,
+        )
+        agent = result.agent
+        if agent not in self.agents:
+            agent = "brain_dump"
+        return {"agent": agent}
+    except Exception:
+        return {"agent": "brain_dump"}
 \end{lstlisting}
 
 The routing fallback is deliberate. If classification fails or returns an unknown agent, the system falls back to the brain-dump path. This preserves usability because the user is still likely to receive a general organizational response rather than an application error.
+
+The chat endpoint then transforms the agent result into durable application state. Extracted items are persisted with the current user's identifier, memory candidates are derived from the user and assistant messages, and the response is normalized into an \texttt{AgentChatResponse}. This is the implementation point where the conversational layer becomes a productivity database rather than a standalone chatbot.
+
+\begin{lstlisting}[language=Python,caption={Chat route persistence and response normalization},label={lst:chat-persistence}]
+result = orchestrator.route_and_execute(
+    user_input=message.message,
+    user_profile=user_profile,
+    chat_history=history_data,
+    db=db,
+    user_id=current_user.id,
+)
+
+for item_data in result.get("items", []):
+    new_item = Item(
+        user_id=current_user.id,
+        title=item_data["title"],
+        category=item_data["category"],
+        priority=item_data.get("priority", 5),
+        status="pending",
+    )
+    db.add(new_item)
+
+memory_candidates = extract_memory_candidates(
+    db, current_user.id, message.message,
+    agent_message=result.get("message", ""),
+)
+
+return AgentChatResponse(
+    agent=result.get("agent", "brain_dump"),
+    message=result.get("message", ""),
+    items=response_items,
+    schedule=response_schedule,
+    reflection=response_reflection,
+    memory_candidates=memory_candidates,
+)
+\end{lstlisting}
 
 \screenshotfigure{images/screenshots/chat_response.png}{Capture a complete chat exchange where the assistant returns structured items and memory candidates.}{Conversational workflow with structured assistant output.}{fig:screenshot-chat}
 
@@ -152,6 +204,32 @@ Dashboard schemas & Aggregated analytics and telemetry output.\\
 
 Typed schemas reduce the risk of UI instability. If an LLM response is malformed, the backend can detect that before returning invalid data to the frontend. This also supports automated tests because expected shapes are explicit.
 
+The JSON helper intentionally combines strict parsing with a small salvage path for fenced model output. This is a practical compromise: the backend requests \texttt{application/json}, validates the result with Pydantic, and retries once with a stricter prompt if validation fails. The algorithmic invariant is that route code receives either a validated schema instance or an explicit \texttt{LLMJSONError}; it does not silently accept arbitrary text.
+
+\begin{lstlisting}[language=Python,caption={Structured LLM JSON parsing and schema validation},label={lst:llm-json}]
+def parse_json_response(text: str) -> dict[str, Any]:
+    cleaned = re.sub(r"<think>.*?</think>", "", text or "",
+                     flags=re.DOTALL).strip()
+    try:
+        parsed = json.loads(cleaned)
+    except json.JSONDecodeError:
+        fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```",
+                                cleaned, re.DOTALL)
+        if fence_match:
+            parsed = json.loads(fence_match.group(1))
+        else:
+            brace_match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+            if not brace_match:
+                raise LLMJSONError("No valid JSON found")
+            parsed = json.loads(brace_match.group(0))
+    if not isinstance(parsed, dict):
+        raise LLMJSONError("Model response must be a JSON object.")
+    return parsed
+
+def validate_json_response(text: str, schema: type[T]) -> T:
+    return TypeAdapter(schema).validate_python(parse_json_response(text))
+\end{lstlisting}
+
 \section{Profile Memory Implementation}
 
 The profile memory implementation is one of the central contributions of the prototype. The system stores active long-term context entries and a history of profile update events. Context entries are categorized as identity, constraint, goal, or general. Each entry may include source and confidence metadata.
@@ -168,6 +246,31 @@ The knowledge graph represents relationships between items. It helps the user mo
 
 Integrity checks prevent invalid graph state. Self-links are rejected because they do not add useful information. Duplicate links are rejected because they clutter the graph. Cross-user links are rejected because they violate data ownership. These checks are small implementation details, but they are important for reliability and privacy.
 
+AI-suggested graph links are also filtered before persistence. The route only accepts suggestions whose source and target belong to the authenticated user, whose endpoints differ, whose normalized link type is supported, and whose confidence weight is greater than 20. In set notation, a suggestion \(s=(u,v,t,w)\) is persisted only if \(u,v \in I_{user}\), \(u \ne v\), \(t \in T\), \(w > 20\), and the edge key is not already present.
+
+\begin{lstlisting}[language=Python,caption={Knowledge graph suggestion filtering},label={lst:graph-filtering}]
+existing_keys = {
+    (link.source_id, link.target_id, _normalize_link_type(link.link_type))
+    for link in existing_links
+}
+
+for suggestion in suggestions:
+    source_id = suggestion.get("source_id")
+    target_id = suggestion.get("target_id")
+    link_type = _normalize_link_type(suggestion.get("link_type"))
+
+    if (source_id not in item_ids or target_id not in item_ids
+            or source_id == target_id
+            or suggestion.get("weight", 0) <= 20):
+        skipped_count += 1
+        continue
+
+    key = (source_id, target_id, link_type)
+    if key in existing_keys:
+        skipped_count += 1
+        continue
+\end{lstlisting}
+
 \screenshotfigure{images/screenshots/knowledge_graph.png}{Capture the database graph view or graph analysis page with nodes and relationships visible.}{Knowledge graph exploration page.}{fig:screenshot-graph}
 
 \section{Scheduling Implementation}
@@ -176,6 +279,22 @@ The schedule module transforms planning requests and pending tasks into schedule
 
 The scheduler demonstrates the thesis claim that the assistant is not only conversational. It creates artifacts that can be used outside the chat interface. In future production work, the schedule module could connect directly to calendar APIs. For the thesis scope, local schedule visualization and export are sufficient.
 
+\begin{lstlisting}[language=Python,caption={Calendar export for scheduled items},label={lst:schedule-export}]
+cal = Calendar()
+cal.add("prodid", "-//ClearMind//Phase2//EN")
+cal.add("version", "2.0")
+
+for item in items:
+    event = Event()
+    event.add("summary", item.title)
+    event.add("description", item.description or f"Category: {item.category}")
+    event.add("dtstart", item.scheduled_start)
+    if item.scheduled_end:
+        event.add("dtend", item.scheduled_end)
+    event.add("uid", f"clearmind-item-{item.id}@clearmind.app")
+    cal.add_component(event)
+\end{lstlisting}
+
 \screenshotfigure{images/screenshots/schedule.png}{Capture the schedule page with grouped blocks and the calendar export control visible.}{Schedule view with export support.}{fig:screenshot-schedule}
 
 \section{Dashboard Implementation}
@@ -183,6 +302,31 @@ The scheduler demonstrates the thesis claim that the assistant is not only conve
 The dashboard aggregates high-level activity information. It is intended as the command center of the assistant. It gives the user a summary of recent behavior, item state, and productivity signals. The dashboard is also useful in the thesis because it provides a visual way to show that backend data is integrated into the frontend.
 
 The dashboard route aggregates data from the database and returns a response consumed by the frontend. Automated tests cover dashboard analytics behavior, which supports the evaluation claims in Chapter 6.
+
+\begin{lstlisting}[language=Python,caption={Dashboard activity and telemetry aggregation},label={lst:dashboard-analytics}]
+activity_by_day = {day: {"task": 0, "idea": 0, "thought": 0}
+                   for day in dates}
+
+items = db.query(Item).filter(
+    Item.user_id == current_user.id,
+    Item.created_at >= start_dt,
+).all()
+
+for item in items:
+    day = item.created_at.date()
+    category = item.category if item.category in {
+        "task", "idea", "thought"} else "thought"
+    activity_by_day[day][category] += 1
+
+telemetry = DashboardTelemetry(
+    active_profile_rules=active_profile_rules,
+    memory_updates=memory_updates,
+    graph_connections=len(links),
+    hidden_connections=hidden_connections,
+    pending_tasks=pending_tasks,
+    reflections=reflections,
+)
+\end{lstlisting}
 
 \section{API Documentation Export}
 
@@ -194,9 +338,9 @@ FastAPI provides interactive API documentation at runtime, but the thesis packag
 
 The backend includes pytest tests for structured JSON parsing, profile memory behavior, dashboard analytics, route behavior, and orchestrator paths. External model behavior is mocked where needed so that tests are deterministic. This separation is important because live LLM calls may fail due to rate limits, network issues, or provider behavior changes.
 
-The CI pipeline is configured through GitHub Actions. It installs dependencies, runs static analysis with Ruff, and executes pytest with an enforced coverage threshold. The final reported coverage is 86.94\%, above the 80\% threshold required by the milestone evidence.
+The CI pipeline is configured through GitHub Actions. It installs dependencies, runs static analysis with Ruff, and executes pytest with an enforced coverage threshold. The final reported coverage is 86.82\%, above the 80\% threshold required by the milestone evidence.
 
-\screenshotfigure{images/screenshots/coverage_report.png}{Capture the test or coverage output showing the 86.94 percent coverage result.}{Automated test coverage evidence.}{fig:screenshot-coverage}
+\screenshotfigure{images/screenshots/coverage_report.png}{Capture the test or coverage output showing the 86.82 percent coverage result.}{Automated test coverage evidence.}{fig:screenshot-coverage}
 
 \screenshotfigure{images/screenshots/ci_success.png}{Capture the GitHub Actions or CI page showing a successful quality pipeline run.}{CI pipeline success evidence.}{fig:screenshot-ci}
 

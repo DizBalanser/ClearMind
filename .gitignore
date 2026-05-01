@@ -69,3 +69,39 @@ SCREENSHOT_INSTRUCTIONS.md
 tools/
 .coverage*
 coverage.xml
+
+# Thesis/local export artifacts
+overleaf_upload/
+overleaf_upload.zip
+_docx_edit_tmp/
+aditional files/
+Declaration on the use of AI tools_theses_web (1).docx
+
+# LaTeX build artifacts
+*.aux
+*.bcf
+*.blg
+*.bbl
+*.run.xml
+*.toc
+*.lof
+*.lot
+*.lol
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Avoid committing generated PDFs/EPS conversions
+*.pdf
+*-eps-converted-to.pdf
+
+# Local thesis media artifacts
+docs/LaTeX/images/screenshots/*.png
+docs/LaTeX/images/*.eps

@@ -27,7 +27,7 @@ Automated test suite:
 Coverage gate result (Milestone 3/4 quality baseline):
 - Command: `pytest --cov=app --cov-fail-under=80`
 - Status: PASS
-- Final reported coverage: 86.94% (within target operating band and above threshold)
+- Final reported coverage: 86.82% (within target operating band and above threshold)
 
 ## 4. CI/CD and Code Quality
 
